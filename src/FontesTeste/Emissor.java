@@ -1,64 +1,66 @@
+package FontesTeste;
 import java.io.*;
 import java.net.*;
 
 public class Emissor {
 	Socket emissor;
-	ObjectOutputStream out;
-	ObjectInputStream in;
-	String packet, ack, str, msg;
-	int n, i = 0, sequence = 0;
-
-public Emissor(){
-	
-}
+	ObjectOutputStream saida;
+	ObjectInputStream entrada;
+	String pacote;
+	String ack;
+	String str;
+	String msg;
+	int n;
+	int i = 0;
+	int seq = 0;
 
 	public void run() {
 		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-			System.out.println("Waiting for Connection....");
-			emissor = new Socket("localhost", 2004);
-			sequence = 0;
+			BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
+			System.out.println("Esperando por conexão...");
+			emissor = new Socket("localhost", 1234);
+			seq = 0;
 
-			out = new ObjectOutputStream(emissor.getOutputStream());
-			out.flush();
-			in = new ObjectInputStream(emissor.getInputStream());
-			str = (String) in.readObject();
-			System.out.println("reciver     > " + str);
-			System.out.println("Enter the data to send....");
-			packet = br.readLine();
-			n = packet.length();
+			saida = new ObjectOutputStream(emissor.getOutputStream());
+			saida.flush();
+			entrada = new ObjectInputStream(emissor.getInputStream());
+			str = (String) entrada.readObject();
+			System.out.println("Receptor: " + str);
+			System.out.println("Digite os dados a serem enviados....");
+			pacote = buffer.readLine();
+			n = pacote.length();
 			do {
 				try {
 					if (i < n) {
-						msg = String.valueOf(sequence);
-						msg = msg.concat(packet.substring(i, i + 1));
+						msg = String.valueOf(seq);
+						msg = msg.concat(pacote.substring(i, i + 1));
 					} else if (i == n) {
 						msg = "end";
-						out.writeObject(msg);
+						saida.writeObject(msg);
 						break;
 					}
-					out.writeObject(msg);
-					sequence = (sequence == 0) ? 1 : 0;
-					out.flush();
-					System.out.println("data sent>" + msg);
-					ack = (String) in.readObject();
-					System.out.println("waiting for ack.....\n\n");
-					if (ack.equals(String.valueOf(sequence))) {
+					saida.writeObject(msg);
+					seq = (seq == 0) ? 1 : 0;
+					saida.flush();
+					System.out.println("Dados enviados ->" + msg);
+					ack = (String) entrada.readObject();
+					System.out.println("Esperando por ack...\n\n");
+					if (ack.equals(String.valueOf(seq))) {
 						i++;
-						System.out.println("receiver   >  " + " packet recieved\n\n");
+						System.out.println("Receptor ->  " + " Pacote recebido\n\n");
 					} else {
-						System.out.println("Time out resending data....\n\n");
-						sequence = (sequence == 0) ? 1 : 0;
+						System.out.println("Timeout alcançado... Reenviando dados\n\n");
+						seq = (seq == 0) ? 1 : 0;
 					}
 				} catch (Exception e) {
 				}
 			} while (i < n + 1);
-			System.out.println("All data sent. exiting.");
+			System.out.println("Todos os dados enviados... fechando conexão.");
 		} catch (Exception e) {
 		} finally {
 			try {
-				in.close();
-				out.close();
+				entrada.close();
+				saida.close();
 				emissor.close();
 			} catch (Exception e) {
 			}
@@ -66,7 +68,7 @@ public Emissor(){
 	}
 
 	public static void main(String args[]) {
-		emissor s = new emissor();
+		Emissor s = new Emissor();
 		s.run();
 	}
 }
