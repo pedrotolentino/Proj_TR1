@@ -9,7 +9,10 @@ import java.net.SocketTimeoutException;
 import java.util.Random;
 
 public class Receptor {
-	public static final int PROB_ERRO_CANAL = 10;
+	
+	private static final int PROB_ERRO_CANAL = 10;
+	private static ServerSocket servidor = null;
+	private static Receptor r = null;
 	
 	boolean isTraferidoComSucesso(int prob) throws SocketTimeoutException{
 		if(prob > PROB_ERRO_CANAL){
@@ -19,14 +22,17 @@ public class Receptor {
 		}
 	}
 	
-	public static void main(String[] args) throws IOException {
-		Receptor r = new Receptor();
+	public void iniciarServidor(int port) throws IOException {
+		
+		r = new Receptor();
+		servidor = new ServerSocket(port);
+		
+	}
+
+	public void aceitarServidor() throws Exception {
 		
 		Random gerador = new Random();
-		
-		ServerSocket servidor = new ServerSocket(12345);
-
-		System.out.println("Porta 12345 aberta!");
+		System.out.println("Porta "+ servidor.getLocalPort() +" aberta!");
 
 		Socket cliente = servidor.accept();
 		
@@ -36,6 +42,8 @@ public class Receptor {
 		
 		OutputStream envioACK = cliente.getOutputStream();
 
+		
+		
 		int qtdOK = 0;
 		int num = 0;
 		do{
