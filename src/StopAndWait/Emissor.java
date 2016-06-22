@@ -9,7 +9,7 @@ import java.net.UnknownHostException;
 public class Emissor {
 	public static final int QTD_PACOTES = 1000;
 
-	public static void main(String[] args) throws UnknownHostException, IOException {
+	public void run() throws UnknownHostException, IOException {
 
 		Socket socketEmi = new Socket("localhost", 12345);
 

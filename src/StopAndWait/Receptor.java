@@ -19,7 +19,7 @@ public class Receptor {
 		}
 	}
 	
-	public static void main(String[] args) throws IOException {
+	public void run() throws IOException {
 		Receptor r = new Receptor();
 		
 		Random gerador = new Random();
