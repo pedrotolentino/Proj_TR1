@@ -1,16 +1,23 @@
 package FontesTeste;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Canal implements Runnable{
-	ServerSocket canal;
+	ServerSocket canalEntrada;
+	ServerSocket canalSaida;
+	int          numPacotes;
 	
-	public Canal(){
+	public Canal(int portaEntrada, int portaSaida, int qtdPacotes){
 		try {
-			this.canal = new ServerSocket(1234);
-			System.out.println("Canal instanciado com sucesso!");
+			this.canalEntrada = new ServerSocket(portaEntrada);
+			this.canalSaida   = new ServerSocket(portaSaida);
+			this.numPacotes   = qtdPacotes;
+			System.out.println("Entrada do canal escutando na porta "+portaEntrada);
+			System.out.println("Saida do canal escutando na porta "+portaSaida);
 			
 		} catch (IOException e) {
 			System.out.println("ERRO ao instanciar o Canal");
@@ -19,14 +26,29 @@ public class Canal implements Runnable{
 	}
 
 	public void run() {
-		System.out.println("Aguardando conex√£o dos clientes...");
-		while(true){
-			try {
-				Socket maquina = canal.accept();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		System.out.println("Aguardando conexao dos clientes...");
+		try {
+			//Esperando a conex„o das m·quinas
+			Socket maqEmissora = canalEntrada.accept();
+			Socket maqReceptora = canalSaida.accept();
+			
+			//Realizando a conex„o da m·quina emissora
+			ObjectOutputStream saidaMaqEmi  = new ObjectOutputStream(maqEmissora.getOutputStream());
+			saidaMaqEmi.flush();
+			ObjectInputStream entradaMaqEmi = new ObjectInputStream(maqEmissora.getInputStream());
+			saidaMaqEmi.writeObject("1");
+			System.out.println("Maquina Emissora conectada com o canal");
+			
+			//Realizando a conex„o da m·quina receptora
+			ObjectOutputStream saidaMaqRec  = new ObjectOutputStream(maqReceptora.getOutputStream());
+			saidaMaqRec.flush();
+			ObjectInputStream entradaMaqRec = new ObjectInputStream(maqReceptora.getInputStream());
+			saidaMaqRec.writeObject("0");
+			System.out.println("Maquina Receptora conectada com o canal");
+		} catch (IOException e) {
+			System.out.println("Erro dentro do canal!");
+			e.printStackTrace();
 		}
+		
 	}
 }

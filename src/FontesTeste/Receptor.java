@@ -57,8 +57,6 @@ public class Receptor {
 
 	public static void main(String args[]) {
 		Receptor s = new Receptor();
-		while (true) {
-			s.run();
-		}
+		s.run();
 	}
 }
