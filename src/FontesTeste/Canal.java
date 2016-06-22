@@ -45,6 +45,14 @@ public class Canal implements Runnable{
 			ObjectInputStream entradaMaqRec = new ObjectInputStream(maqReceptora.getInputStream());
 			saidaMaqRec.writeObject("0");
 			System.out.println("Maquina Receptora conectada com o canal");
+			
+			for(int i = 0; i < numPacotes; i++){
+				entradaMaqEmi.read();
+				System.out.print(" Canal -> ");
+				saidaMaqRec.write(1);
+				entradaMaqRec.read();
+				saidaMaqEmi.write(0);
+			}
 		} catch (IOException e) {
 			System.out.println("Erro dentro do canal!");
 			e.printStackTrace();

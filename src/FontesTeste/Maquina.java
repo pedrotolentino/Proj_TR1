@@ -31,10 +31,10 @@ public class Maquina implements Runnable{
 			
 			if(ehEmissor){
 				System.out.println("Emissor conectado e transferindo");
-				funcionalidadeEmissor();
+				funcionalidadeEmissor(entradaCanal, saidaCanal);
 			}else{
 				System.out.println("Receptor conectado e transferindo");
-				funcionalidadeReceptor();
+				funcionalidadeReceptor(entradaCanal, saidaCanal);
 			}
 			
 		} catch (IOException e) {
@@ -47,15 +47,18 @@ public class Maquina implements Runnable{
 		
 	}
 	
-	private void funcionalidadeEmissor(){
+	private void funcionalidadeEmissor(ObjectInputStream in, ObjectOutputStream out) throws IOException{
 		for(int i = 0; i < numPacotes; i++){
-			
+			out.write(1);
+			System.out.print("Emi -> ");
+			in.read();
 		}
 	}
 	
-	private void funcionalidadeReceptor(){
+	private void funcionalidadeReceptor(ObjectInputStream in, ObjectOutputStream out) throws IOException{
 		for(int i = 0; i < numPacotes; i++){
-			
+			System.out.println("Rec: "+in.read());
+			out.write(0);
 		}
 	}
 }
