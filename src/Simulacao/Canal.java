@@ -10,9 +10,9 @@ import java.util.Vector;
 public class Canal implements Runnable{
 	ServerSocket canalEntrada;
 	ServerSocket canalSaida;
-	public static final int FIM_TRASMISSAO = -1;
-	public static final int CANAL_PRONTO   = 10;
-	public static final int TRANSMISSAO    = 20;
+	static final int FIM_TRASMISSAO = -1;
+	static final int CANAL_PRONTO   = 10;
+	static final int TRANSMISSAO    = 20;
 	
 	public Canal(int portaEntrada, int portaSaida, int qtdPacotes){
 		try {
@@ -29,6 +29,10 @@ public class Canal implements Runnable{
 
 	public void run() {
 		Vector pacote = null;
+		ObjectInputStream entradaMaqEmi = null;
+		ObjectOutputStream saidaMaqEmi  = null;
+		ObjectInputStream entradaMaqRec = null;
+		ObjectOutputStream saidaMaqRec  = null; 
 		System.out.println("Aguardando conexao dos clientes...");
 		try {
 			//Esperando a conexao das maquinas
@@ -37,14 +41,14 @@ public class Canal implements Runnable{
 			
 			//Realizando a conexao da maquina emissora
 			maqEmissora.sendUrgentData(1);
-			ObjectInputStream entradaMaqEmi = new ObjectInputStream(maqEmissora.getInputStream());
-			ObjectOutputStream saidaMaqEmi  = new ObjectOutputStream(maqEmissora.getOutputStream());
+			entradaMaqEmi = new ObjectInputStream(maqEmissora.getInputStream());
+			saidaMaqEmi  = new ObjectOutputStream(maqEmissora.getOutputStream());
 			saidaMaqEmi.writeObject(true);
 			System.out.println("Maquina "+entradaMaqEmi.readObject()+" conectada com o canal ");
 			
 			//Realizando a conexao da maquina receptora
-			ObjectInputStream entradaMaqRec = new ObjectInputStream(maqReceptora.getInputStream());
-			ObjectOutputStream saidaMaqRec  = new ObjectOutputStream(maqReceptora.getOutputStream());
+			entradaMaqRec = new ObjectInputStream(maqReceptora.getInputStream());
+			saidaMaqRec  = new ObjectOutputStream(maqReceptora.getOutputStream());
 			saidaMaqRec.writeObject(false);
 			System.out.println("Maquina "+entradaMaqRec.readObject()+" conectada com o canal");
 			
@@ -56,7 +60,7 @@ public class Canal implements Runnable{
 				System.out.print(" Canal -> ");
 				for(int i = 0; i < pacote.size(); i++){
 					int[] pct = (int[]) pacote.get(i);
-					for(int j = 0; j < 8; j++){
+					for(int j = 0; j < 11; j++){
 						System.out.print(pct[j]+" ");;
 					}
 				}
@@ -71,6 +75,15 @@ public class Canal implements Runnable{
 		} catch (ClassNotFoundException e) {
 			System.out.println("Classe nao encontrada no Canal!");
 			e.printStackTrace();
+		}finally{
+			try{
+				entradaMaqEmi.close();
+				saidaMaqEmi.close();
+				entradaMaqRec.close();
+				saidaMaqRec.close();
+			}catch(Exception e){
+				System.out.println("Erro ao finalizar as streams");
+			}
 		}
 		
 	}
