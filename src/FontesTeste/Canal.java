@@ -9,13 +9,12 @@ import java.net.Socket;
 public class Canal implements Runnable{
 	ServerSocket canalEntrada;
 	ServerSocket canalSaida;
-	int          numPacotes;
+	public static final int CANAL_PRONTO = 10;
 	
 	public Canal(int portaEntrada, int portaSaida, int qtdPacotes){
 		try {
 			this.canalEntrada = new ServerSocket(portaEntrada);
 			this.canalSaida   = new ServerSocket(portaSaida);
-			this.numPacotes   = qtdPacotes;
 			System.out.println("Entrada do canal escutando na porta "+portaEntrada);
 			System.out.println("Saida do canal escutando na porta "+portaSaida);
 			
@@ -26,6 +25,7 @@ public class Canal implements Runnable{
 	}
 
 	public void run() {
+		int valor = CANAL_PRONTO;
 		System.out.println("Aguardando conexao dos clientes...");
 		try {
 			//Esperando a conexão das máquinas
@@ -46,13 +46,32 @@ public class Canal implements Runnable{
 			saidaMaqRec.writeObject("0");
 			System.out.println("Maquina Receptora conectada com o canal");
 			
-			for(int i = 0; i < numPacotes; i++){
+			/*for(int i = 0; i < numPacotes; i++){
 				entradaMaqEmi.read();
 				System.out.print(" Canal -> ");
 				saidaMaqRec.write(1);
 				entradaMaqRec.read();
 				saidaMaqEmi.write(0);
-			}
+			}*/
+			
+			/*while(valor != -1){
+				while(valor == CANAL_PRONTO){
+					System.out.println("Dizendo que o canal está pronto!");
+					saidaMaqEmi.write(CANAL_PRONTO);
+					valor = entradaMaqEmi.read();
+				}
+				valor = entradaMaqEmi.read();
+				System.out.print(" Canal -> ");
+				saidaMaqRec.write(valor);
+				valor = entradaMaqRec.read();
+				saidaMaqEmi.write(valor);
+			}*/
+			saidaMaqEmi.write(CANAL_PRONTO);
+			entradaMaqEmi.read();
+			System.out.print(" Canal -> ");
+			saidaMaqRec.write(1);
+			entradaMaqRec.read();
+			saidaMaqEmi.write(0);
 		} catch (IOException e) {
 			System.out.println("Erro dentro do canal!");
 			e.printStackTrace();

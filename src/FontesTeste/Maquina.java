@@ -9,6 +9,7 @@ public class Maquina implements Runnable{
 	Socket conn;
 	int numPacotes;
 	boolean ehEmissor;
+	public static final int CANAL_PRONTO = 10;
 	
 	public Maquina(String ip, int porta, int qtdPacotes){
 		try {
@@ -43,22 +44,34 @@ public class Maquina implements Runnable{
 		} catch (ClassNotFoundException e) {
 			System.out.println("Classe não encontrada!");
 			e.printStackTrace();
+		} catch (InterruptedException e) {
+			System.out.println("Erro no sleep da Thread");
+			e.printStackTrace();
 		}
 		
 	}
 	
-	private void funcionalidadeEmissor(ObjectInputStream in, ObjectOutputStream out) throws IOException{
-		for(int i = 0; i < numPacotes; i++){
+	private void funcionalidadeEmissor(ObjectInputStream in, ObjectOutputStream out) throws IOException, InterruptedException{
+		/*for(int i = 0; i < numPacotes; i++){
+			if(in.read() == CANAL_PRONTO){
+				out.write(1);
+				Thread.sleep(100);
+				out.write(1);
+				System.out.print("Emi -> ");
+				in.read();
+			}
+		}*/
+		if(in.read() == CANAL_PRONTO){
 			out.write(1);
 			System.out.print("Emi -> ");
-			in.read();
 		}
 	}
 	
 	private void funcionalidadeReceptor(ObjectInputStream in, ObjectOutputStream out) throws IOException{
-		for(int i = 0; i < numPacotes; i++){
+		/*for(int i = 0; i < numPacotes; i++){
 			System.out.println("Rec: "+in.read());
 			out.write(0);
-		}
+		}*/
+		System.out.println("Rec: "+in.read());
 	}
 }
