@@ -9,28 +9,31 @@ public class Maquina implements Runnable{
 	Socket conn;
 	int numPacotes;
 	boolean ehEmissor;
-	public static final int CANAL_PRONTO = 10;
+	public static final int FIM_TRANSMISSAO = -1;
+	public static final int CANAL_PRONTO    = 10;
+	public static final int TRANSMISSAO     = 20;
 	
 	public Maquina(String ip, int porta, int qtdPacotes){
 		try {
 			this.numPacotes = qtdPacotes;
 			this.conn = new Socket(ip, porta);
-			System.out.println("Máquina "+ip+" conectada com o servidor na porta "+porta);
 		} catch (IOException e) {
-			System.out.println("Erro ao realizar conexão da máquina!");
+			System.out.println("Erro ao realizar conexï¿½o da mï¿½quina!");
 			e.printStackTrace();
 		}
 	}
 	
 	public void run(){
 		try {
+			System.out.println("Mï¿½quina "+conn.getInetAddress()+" conectada com o servidor na porta "+conn.getPort());
 			ObjectOutputStream saidaCanal  = new ObjectOutputStream(conn.getOutputStream());
-			saidaCanal.flush();
 			ObjectInputStream entradaCanal = new ObjectInputStream(conn.getInputStream());
 			 
-			ehEmissor = (boolean)entradaCanal.readObject().equals("1")? true : false;
+			ehEmissor = (boolean)entradaCanal.readObject();
 			
-			if(ehEmissor){
+			saidaCanal.writeObject(ehEmissor?"Emissora": "Receptora");
+			
+			if((Integer)entradaCanal.readObject() == CANAL_PRONTO && ehEmissor){
 				System.out.println("Emissor conectado e transferindo");
 				funcionalidadeEmissor(entradaCanal, saidaCanal);
 			}else{
@@ -39,39 +42,29 @@ public class Maquina implements Runnable{
 			}
 			
 		} catch (IOException e) {
-			System.out.println("Erro na máquina!");
+			System.out.println("Erro na mï¿½quina!");
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			System.out.println("Classe não encontrada!");
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			System.out.println("Erro no sleep da Thread");
+			System.out.println("Classe nï¿½o encontrada!");
 			e.printStackTrace();
 		}
 		
 	}
 	
-	private void funcionalidadeEmissor(ObjectInputStream in, ObjectOutputStream out) throws IOException, InterruptedException{
-		/*for(int i = 0; i < numPacotes; i++){
-			if(in.read() == CANAL_PRONTO){
-				out.write(1);
-				Thread.sleep(100);
-				out.write(1);
-				System.out.print("Emi -> ");
-				in.read();
-			}
-		}*/
-		if(in.read() == CANAL_PRONTO){
-			out.write(1);
+	private void funcionalidadeEmissor(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException{
+		for(int i = 0; i < numPacotes; i++){
+			out.writeObject(TRANSMISSAO);
+			out.writeObject("1");
 			System.out.print("Emi -> ");
+			System.out.println(in.readObject());
 		}
+		out.writeObject(FIM_TRANSMISSAO);
 	}
 	
-	private void funcionalidadeReceptor(ObjectInputStream in, ObjectOutputStream out) throws IOException{
-		/*for(int i = 0; i < numPacotes; i++){
-			System.out.println("Rec: "+in.read());
-			out.write(0);
-		}*/
-		System.out.println("Rec: "+in.read());
+	private void funcionalidadeReceptor(ObjectInputStream in, ObjectOutputStream out) throws IOException, ClassNotFoundException{
+		for(int i = 0; i < numPacotes; i++){
+			System.out.println(" Rec: "+in.readObject());
+			out.writeObject("ACK");
+		}
 	}
 }

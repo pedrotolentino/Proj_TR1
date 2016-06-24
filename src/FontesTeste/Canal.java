@@ -9,14 +9,15 @@ import java.net.Socket;
 public class Canal implements Runnable{
 	ServerSocket canalEntrada;
 	ServerSocket canalSaida;
-	public static final int CANAL_PRONTO = 10;
+	public static final int FIM_TRASMISSAO = -1;
+	public static final int CANAL_PRONTO   = 10;
 	
 	public Canal(int portaEntrada, int portaSaida, int qtdPacotes){
 		try {
 			this.canalEntrada = new ServerSocket(portaEntrada);
 			this.canalSaida   = new ServerSocket(portaSaida);
-			System.out.println("Entrada do canal escutando na porta "+portaEntrada);
-			System.out.println("Saida do canal escutando na porta "+portaSaida);
+			System.out.println("Entrada do canal escutando na porta "+canalEntrada.getLocalPort());
+			System.out.println("Saida do canal escutando na porta "+canalSaida.getLocalPort());
 			
 		} catch (IOException e) {
 			System.out.println("ERRO ao instanciar o Canal");
@@ -28,23 +29,22 @@ public class Canal implements Runnable{
 		int valor = CANAL_PRONTO;
 		System.out.println("Aguardando conexao dos clientes...");
 		try {
-			//Esperando a conexão das máquinas
+			//Esperando a conexï¿½o das mï¿½quinas
 			Socket maqEmissora = canalEntrada.accept();
 			Socket maqReceptora = canalSaida.accept();
 			
-			//Realizando a conexão da máquina emissora
-			ObjectOutputStream saidaMaqEmi  = new ObjectOutputStream(maqEmissora.getOutputStream());
-			saidaMaqEmi.flush();
+			//Realizando a conexï¿½o da mï¿½quina emissora
+			maqEmissora.sendUrgentData(1);
 			ObjectInputStream entradaMaqEmi = new ObjectInputStream(maqEmissora.getInputStream());
-			saidaMaqEmi.writeObject("1");
-			System.out.println("Maquina Emissora conectada com o canal");
+			ObjectOutputStream saidaMaqEmi  = new ObjectOutputStream(maqEmissora.getOutputStream());
+			saidaMaqEmi.writeObject(true);
+			System.out.println("Maquina "+entradaMaqEmi.readObject()+" conectada com o canal ");
 			
-			//Realizando a conexão da máquina receptora
-			ObjectOutputStream saidaMaqRec  = new ObjectOutputStream(maqReceptora.getOutputStream());
-			saidaMaqRec.flush();
+			//Realizando a conexï¿½o da mï¿½quina receptora
 			ObjectInputStream entradaMaqRec = new ObjectInputStream(maqReceptora.getInputStream());
-			saidaMaqRec.writeObject("0");
-			System.out.println("Maquina Receptora conectada com o canal");
+			ObjectOutputStream saidaMaqRec  = new ObjectOutputStream(maqReceptora.getOutputStream());
+			saidaMaqRec.writeObject(false);
+			System.out.println("Maquina "+entradaMaqRec.readObject()+" conectada com o canal");
 			
 			/*for(int i = 0; i < numPacotes; i++){
 				entradaMaqEmi.read();
@@ -53,27 +53,19 @@ public class Canal implements Runnable{
 				entradaMaqRec.read();
 				saidaMaqEmi.write(0);
 			}*/
+			saidaMaqRec.writeObject(CANAL_PRONTO);
+			saidaMaqEmi.writeObject(CANAL_PRONTO);
 			
-			/*while(valor != -1){
-				while(valor == CANAL_PRONTO){
-					System.out.println("Dizendo que o canal está pronto!");
-					saidaMaqEmi.write(CANAL_PRONTO);
-					valor = entradaMaqEmi.read();
-				}
-				valor = entradaMaqEmi.read();
-				System.out.print(" Canal -> ");
-				saidaMaqRec.write(valor);
-				valor = entradaMaqRec.read();
-				saidaMaqEmi.write(valor);
-			}*/
-			saidaMaqEmi.write(CANAL_PRONTO);
-			entradaMaqEmi.read();
-			System.out.print(" Canal -> ");
-			saidaMaqRec.write(1);
-			entradaMaqRec.read();
-			saidaMaqEmi.write(0);
+			while((Integer)entradaMaqEmi.readObject() != FIM_TRASMISSAO){
+				System.out.print(" Canal -> "+entradaMaqEmi.readObject());
+				saidaMaqRec.writeObject("1");
+				saidaMaqEmi.writeObject(entradaMaqRec.readObject());
+			}
 		} catch (IOException e) {
 			System.out.println("Erro dentro do canal!");
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
