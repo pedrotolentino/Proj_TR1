@@ -8,7 +8,7 @@ public class CRC {
 	private final int      geradorBits  = 4;
 	private final int      pacoteBits   = 8;
 	private final int      totalBits    = pacoteBits + geradorBits - 1;
-	private final Integer  polGerador[] = new Integer[geradorBits];
+	private final int  polGerador[] = new int[geradorBits];
 
 	public CRC(){
 		polGerador[0]=1; 
@@ -67,18 +67,18 @@ public class CRC {
 		return false;
 	}
 	
-	private int[] divide(int dividendo[], Integer divisor[], int resto[])
+	private int[] divide(int dividendo[], int[] polGerador2, int resto[])
 	{
 		int atual = 0;
 		while(true)
 		{
-			for(int i=0; i < divisor.length; i++){
-				resto[atual+i] = (resto[atual+i] ^ divisor[i]);
+			for(int i=0; i < polGerador2.length; i++){
+				resto[atual+i] = (resto[atual+i] ^ polGerador2[i]);
 			}
 			while(resto[atual] == 0 && atual!=resto.length-1){
 				atual++;
 			}
-			if((resto.length-atual) < divisor.length){
+			if((resto.length-atual) < polGerador2.length){
 				break;
 			}
 		}

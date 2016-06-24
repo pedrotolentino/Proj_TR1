@@ -1,0 +1,77 @@
+package Simulacao;
+
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.Vector;
+
+public class Canal implements Runnable{
+	ServerSocket canalEntrada;
+	ServerSocket canalSaida;
+	public static final int FIM_TRASMISSAO = -1;
+	public static final int CANAL_PRONTO   = 10;
+	public static final int TRANSMISSAO    = 20;
+	
+	public Canal(int portaEntrada, int portaSaida, int qtdPacotes){
+		try {
+			this.canalEntrada = new ServerSocket(portaEntrada);
+			this.canalSaida   = new ServerSocket(portaSaida);
+			System.out.println("Entrada do canal escutando na porta "+canalEntrada.getLocalPort());
+			System.out.println("Saida do canal escutando na porta "+canalSaida.getLocalPort());
+			
+		} catch (IOException e) {
+			System.out.println("ERRO ao instanciar o Canal");
+			e.printStackTrace();
+		}
+	}
+
+	public void run() {
+		Vector pacote = null;
+		System.out.println("Aguardando conexao dos clientes...");
+		try {
+			//Esperando a conexao das maquinas
+			Socket maqEmissora = canalEntrada.accept();
+			Socket maqReceptora = canalSaida.accept();
+			
+			//Realizando a conexao da maquina emissora
+			maqEmissora.sendUrgentData(1);
+			ObjectInputStream entradaMaqEmi = new ObjectInputStream(maqEmissora.getInputStream());
+			ObjectOutputStream saidaMaqEmi  = new ObjectOutputStream(maqEmissora.getOutputStream());
+			saidaMaqEmi.writeObject(true);
+			System.out.println("Maquina "+entradaMaqEmi.readObject()+" conectada com o canal ");
+			
+			//Realizando a conexao da maquina receptora
+			ObjectInputStream entradaMaqRec = new ObjectInputStream(maqReceptora.getInputStream());
+			ObjectOutputStream saidaMaqRec  = new ObjectOutputStream(maqReceptora.getOutputStream());
+			saidaMaqRec.writeObject(false);
+			System.out.println("Maquina "+entradaMaqRec.readObject()+" conectada com o canal");
+			
+			saidaMaqRec.writeObject(CANAL_PRONTO);
+			saidaMaqEmi.writeObject(CANAL_PRONTO);
+			
+			while((Integer)entradaMaqEmi.readObject() != FIM_TRASMISSAO){
+				pacote  = (Vector) entradaMaqEmi.readObject();
+				System.out.print(" Canal -> ");
+				for(int i = 0; i < pacote.size(); i++){
+					int[] pct = (int[]) pacote.get(i);
+					for(int j = 0; j < 8; j++){
+						System.out.print(pct[j]+" ");;
+					}
+				}
+				saidaMaqRec.writeObject(TRANSMISSAO);
+				saidaMaqRec.writeObject(pacote);
+				saidaMaqEmi.writeObject(entradaMaqRec.readObject());
+			}
+			saidaMaqRec.writeObject(FIM_TRASMISSAO);
+		} catch (IOException e) {
+			System.out.println("Erro dentro do canal!");
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			System.out.println("Classe nao encontrada no Canal!");
+			e.printStackTrace();
+		}
+		
+	}
+}
