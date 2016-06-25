@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Random;
 import java.util.Vector;
 
 public class Canal implements Runnable{
@@ -89,11 +90,24 @@ public class Canal implements Runnable{
 		}
 	}
 	
-	private boolean isPctTransferidoComSucesso(int[] pacote){
-		return true;
+	private boolean isPctTransferidoComSucesso(){
+		Random r = new Random();
+		
+		if(r.nextInt(101) > PROB_PERDA){
+			return true;
+		}else{
+			return false;
+		}
 	}
 	
-	public int[] interferenciaRuido(int[] pacote){
+	private int[] interferenciaRuido(int[] pacote){
+		Random r = new Random();
+		
+		for(int i = 0; i < pacote.length; i++){
+			if(r.nextInt(101) <= TAXA_RUIDO){
+				pacote[i] = pacote[i] == 0? 1: 0;
+			}
+		}
 		return pacote;
 	}
 }
