@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.util.Random;
 import java.util.Vector;
 
+import Protocolos.ProtGoBackN;
 import Protocolos.ProtStopAndWait;
 import Verificacao.CRC;
 
@@ -50,9 +51,11 @@ public class Maquina implements Runnable{
 			
 			if((Integer)entradaCanal.readObject() == CANAL_PRONTO && ehEmissor){
 				System.out.println("Emissor conectado e transferindo");
+				Thread.sleep(300);
 				funcionalidadeEmissor(entradaCanal, saidaCanal);
 			}else{
 				System.out.println("Receptor conectado e transferindo");
+				Thread.sleep(300);
 				funcionalidadeReceptor(entradaCanal, saidaCanal);
 			}
 			
@@ -77,9 +80,10 @@ public class Maquina implements Runnable{
 	}
 	
 	private void funcionalidadeEmissor(ObjectInputStream in, ObjectOutputStream out) throws Exception{
+		CRC crc = new CRC();
+		
 		switch(tipoProtocolo){
 		case STOP_AND_WAIT:
-			CRC crc = new CRC();
 			for(int i = 0; i < numPacotes; i++){
 				Vector<Object> v = new Vector<>();
 				ProtStopAndWait sw = new ProtStopAndWait();
@@ -91,6 +95,24 @@ public class Maquina implements Runnable{
 			out.writeObject(FIM_TRANSMISSAO);
 			break;
 		case GO_BACK_N:
+			ProtGoBackN bcn = new ProtGoBackN();
+			Vector<Object> v = new Vector<>();
+			int i;
+			for(i = 0; i < numPacotes; i++){
+				
+				v.addElement(crc.encriptar(gerarInformacao()));
+				
+				if((i + 1)%TAMANHO_JANELA == 0){
+					out.writeObject(TRANSMISSAO);
+					bcn.enviarPacote(in, out, v);
+					v = new Vector<>();
+				}
+			}
+			if((i + 1)%TAMANHO_JANELA != 0){
+				out.writeObject(TRANSMISSAO);
+				bcn.enviarPacote(in, out, v);
+			}
+			out.writeObject(FIM_TRANSMISSAO);
 			break;
 		case SELECTIVE_REPEAT:
 			break;
@@ -102,7 +124,7 @@ public class Maquina implements Runnable{
 	private void funcionalidadeReceptor(ObjectInputStream in, ObjectOutputStream out) throws Exception{
 		CRC crc = new CRC();
 		while((Integer)in.readObject() != FIM_TRANSMISSAO){
-			System.out.print(" Rec: ");
+			System.out.print("\nRec:             ");
 			
 			Vector pacote = (Vector) in.readObject();
 			int[] retorno = new int[TAMANHO_JANELA];
@@ -113,6 +135,7 @@ public class Maquina implements Runnable{
 				}else{
 					retorno[i] = 0;
 				}
+				System.out.print(i+1+"o Pacote: ");
 				int[] pct = (int[]) pacote.get(i);
 				for(int j = 0; j < NUM_BITS_PACOTE; j++){
 					System.out.print(pct[j]+" ");;

@@ -59,6 +59,7 @@ public class Canal implements Runnable{
 				pacote  = (Vector) entradaMaqEmi.readObject();
 				System.out.print(" Canal -> ");
 				for(int i = 0; i < pacote.size(); i++){
+					System.out.print(i+1+"o Pacote: ");
 					int[] pct = (int[]) pacote.get(i);
 					for(int j = 0; j < 11; j++){
 						System.out.print(pct[j]+" ");;
