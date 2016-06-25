@@ -13,6 +13,8 @@ public class Canal implements Runnable{
 	static final int FIM_TRASMISSAO = -1;
 	static final int CANAL_PRONTO   = 10;
 	static final int TRANSMISSAO    = 20;
+	static final int PROB_PERDA     = 50;
+	static final int TAXA_RUIDO     = 20;
 	
 	public Canal(int portaEntrada, int portaSaida, int qtdPacotes){
 		try {
@@ -85,6 +87,13 @@ public class Canal implements Runnable{
 				System.out.println("Erro ao finalizar as streams");
 			}
 		}
-		
+	}
+	
+	private boolean isPctTransferidoComSucesso(int[] pacote){
+		return true;
+	}
+	
+	public int[] interferenciaRuido(int[] pacote){
+		return pacote;
 	}
 }

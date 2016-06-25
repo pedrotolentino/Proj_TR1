@@ -9,11 +9,15 @@ import Simulacao.Protocolo;
 
 public class ProtStopAndWait implements Protocolo{
 	public void enviarPacote(ObjectInputStream in, ObjectOutputStream out, Vector pacote) throws IOException, ClassNotFoundException {
+		int flagRetorno = -1;
 		
-		out.writeObject(pacote);
-		System.out.print("Emi -> ");
-		int[] ret = (int[]) in.readObject();
-		System.out.println(ret[0] == 1?"ACK":"NACK");
+		while(flagRetorno != ACK){
+			out.writeObject(TRANSMISSAO);
+			out.writeObject(pacote);
+			System.out.print("Emi -> ");
+			int[] ret = (int[]) in.readObject();
+			System.out.println(ret[0] == 1?"ACK":"NACK");
+		}
 	}
 	
 }
