@@ -25,7 +25,7 @@ public class MainSimulacao {
 			}
 		}
 		
-		System.out.println("Fim de execução do Protocolo de teste");
+		System.out.println("Fim de execuï¿½ï¿½o do Protocolo de teste");
 		
 	}
 	

@@ -96,42 +96,40 @@ public class Maquina implements Runnable{
 			break;
 		case GO_BACK_N:
 			ProtGoBackN bcn = new ProtGoBackN();
-			Vector<Object> v = new Vector<>();
+			Vector<int []> v = new Vector<>();
 			int i;
 			for(i = 0; i < numPacotes; i++){
 				
 				v.addElement(crc.encriptar(gerarInformacao()));
 				
 				if((i + 1)%TAMANHO_JANELA == 0){
-					out.writeObject(TRANSMISSAO);
 					bcn.enviarPacote(in, out, v);
 					v = new Vector<>();
 				}
 			}
-			if((i + 1)%TAMANHO_JANELA != 0){
-				out.writeObject(TRANSMISSAO);
+			if((i + 1)%TAMANHO_JANELA != 0 && !v.isEmpty()){
 				bcn.enviarPacote(in, out, v);
 			}
+			out.reset();
 			out.writeObject(FIM_TRANSMISSAO);
 			break;
 		case SELECTIVE_REPEAT:
 			ProtSelectiveRepeat sr = new ProtSelectiveRepeat();
-			Vector<Object> ve = new Vector<>();
+			Vector<int []> ve = new Vector<>();
 			int j;
 			for(j = 0; j < numPacotes; j++){
 				
 				ve.addElement(crc.encriptar(gerarInformacao()));
 				
 				if((j + 1)%TAMANHO_JANELA == 0){
-					out.writeObject(TRANSMISSAO);
 					sr.enviarPacote(in, out, ve);
 					ve = new Vector<>();
 				}
 			}
 			if((j + 1)%TAMANHO_JANELA != 0){
-				out.writeObject(TRANSMISSAO);
 				sr.enviarPacote(in, out, ve);
 			}
+			out.reset();
 			out.writeObject(FIM_TRANSMISSAO);
 			break;
 		default:
@@ -146,8 +144,9 @@ public class Maquina implements Runnable{
 			
 			Vector pacote = (Vector) in.readObject();
 			int[] retorno = new int[TAMANHO_JANELA];
+			int i;
 			
-			for(int i = 0; i < pacote.size(); i++){
+			for(i = 0; i < pacote.size(); i++){
 				if(crc.desencriptar((int[]) pacote.get(i))){
 					retorno[i] = 1;
 				}else{
@@ -159,6 +158,11 @@ public class Maquina implements Runnable{
 					System.out.print(pct[j]+" ");;
 				}
 			}
+			
+			for(int k = i; k < TAMANHO_JANELA; k++){
+				retorno[k] = 2;
+			}
+			
 			out.reset();
 			out.writeObject(retorno);
 		}

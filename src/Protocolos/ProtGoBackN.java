@@ -16,7 +16,9 @@ public class ProtGoBackN implements Protocolo{
 		int flagRetorno = -1;
 		int[] ret = null;
 		while(flagRetorno != ACK){
+			out.reset();
 			out.writeObject(TRANSMISSAO);
+			out.reset();
 			out.writeObject(pacote);
 			System.out.print("Emi -> ");
 			try{
@@ -24,13 +26,15 @@ public class ProtGoBackN implements Protocolo{
 				
 			}catch(InterruptedByTimeoutException e){}
 			
+			System.out.println();
+			
 			for(int i = 0; i < ret.length; i++){
 				if(ret[i] == NACK){
-					System.out.println("NACK do pacote "+i+1+"... Realizando reenvio");
+					System.out.println("NACK do pacote "+(i+1)+"... Realizando reenvio");
 					flagRetorno = NACK;
 					break;
-				}else{
-					System.out.println("ACK do pacote "+i+1);
+				}else if(ret[i] == ACK){
+					System.out.println("ACK do pacote "+(i+1));
 					flagRetorno = ACK;
 				}
 			}

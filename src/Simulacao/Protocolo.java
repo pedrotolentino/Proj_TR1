@@ -8,7 +8,6 @@ import java.util.Vector;
 public interface Protocolo {
 	public static final int NACK        = 0;
 	public static final int ACK         = 1;
-	public static final int TIME_OUT    = 2;
 	public static final int TRANSMISSAO = 20;
 	
 	public void enviarPacote(ObjectInputStream in, ObjectOutputStream out, Vector pacote) throws IOException, ClassNotFoundException;
