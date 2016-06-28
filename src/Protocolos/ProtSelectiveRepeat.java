@@ -6,6 +6,7 @@ import java.io.ObjectOutputStream;
 import java.nio.channels.InterruptedByTimeoutException;
 import java.util.Vector;
 
+import Simulacao.Constantes;
 import Simulacao.Protocolo;
 
 public class ProtSelectiveRepeat implements Protocolo{	
@@ -14,11 +15,11 @@ public class ProtSelectiveRepeat implements Protocolo{
 		int flagRetorno = -1;
 		int[] ret = null;
 		Vector novoPacote = null;
-		while(flagRetorno != ACK){
-			flagRetorno = ACK;
+		while(flagRetorno != Constantes.ACK){
+			flagRetorno = Constantes.ACK;
 			int erro = 0;
 			out.reset();
-			out.writeObject(TRANSMISSAO);
+			out.writeObject(Constantes.TRANSMISSAO);
 			out.writeObject(pacote);
 
 			System.out.print("Emi -> ");
@@ -29,19 +30,19 @@ public class ProtSelectiveRepeat implements Protocolo{
 						
 			System.out.println();
 			for(int i = 0; i < ret.length; i++){
-				if(ret[i] == NACK){
-					flagRetorno = NACK;
+				if(ret[i] == Constantes.NACK){
+					flagRetorno = Constantes.NACK;
 					erro++;
 					System.out.println("NACK do pacote "+(i+1)+"");
 
-				}else if(ret[i] == ACK){
+				}else if(ret[i] == Constantes.ACK){
 					System.out.println("ACK do pacote "+(i+1));
 				}
 			}
-			if(flagRetorno == NACK){
+			if(flagRetorno == Constantes.NACK){
 				novoPacote = new Vector<>(erro);
 				for(int i = 0; i < ret.length; i++){
-					if(ret[i] == NACK){
+					if(ret[i] == Constantes.NACK){
 						novoPacote.add(pacote.get(i));
 					}
 				}

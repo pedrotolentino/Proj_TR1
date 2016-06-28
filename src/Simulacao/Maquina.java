@@ -17,15 +17,6 @@ public class Maquina implements Runnable{
 	int     numPacotes;
 	int     tipoProtocolo;
 	boolean ehEmissor;
-	static final int FIM_TRANSMISSAO  = -1;
-	static final int STOP_AND_WAIT    =  1;
-	static final int GO_BACK_N        =  2;
-	static final int SELECTIVE_REPEAT =  3;	
-	static final int NUM_BITS_INFO    =  8;
-	static final int NUM_BITS_PACOTE  = 11;
-	static final int TAMANHO_JANELA   =  5;
-	static final int CANAL_PRONTO     = 10;
-	static final int TRANSMISSAO      = 20;
 	
 	public Maquina(String ip, int porta, int qtdPacotes, int protocolo){
 		try {
@@ -50,7 +41,7 @@ public class Maquina implements Runnable{
 			
 			saidaCanal.writeObject(ehEmissor?"Emissora": "Receptora");
 			
-			if((Integer)entradaCanal.readObject() == CANAL_PRONTO && ehEmissor){
+			if((Integer)entradaCanal.readObject() == Constantes.CANAL_PRONTO && ehEmissor){
 				System.out.println("Emissor conectado e transferindo");
 				Thread.sleep(300);
 				funcionalidadeEmissor(entradaCanal, saidaCanal);
@@ -84,7 +75,7 @@ public class Maquina implements Runnable{
 		CRC crc = new CRC();
 		
 		switch(tipoProtocolo){
-		case STOP_AND_WAIT:
+		case Constantes.STOP_AND_WAIT:
 			for(int i = 0; i < numPacotes; i++){
 				Vector<int []> v = new Vector<>();
 				ProtStopAndWait sw = new ProtStopAndWait();
@@ -92,9 +83,9 @@ public class Maquina implements Runnable{
 				v.addElement(crc.encriptar(gerarInformacao()));
 				sw.enviarPacote(in, out, v);
 			}
-			out.writeObject(FIM_TRANSMISSAO);
+			out.writeObject(Constantes.FIM_TRANSMISSAO);
 			break;
-		case GO_BACK_N:
+		case Constantes.GO_BACK_N:
 			ProtGoBackN bcn = new ProtGoBackN();
 			Vector<int []> v = new Vector<>();
 			int i;
@@ -102,18 +93,18 @@ public class Maquina implements Runnable{
 				
 				v.addElement(crc.encriptar(gerarInformacao()));
 				
-				if((i + 1)%TAMANHO_JANELA == 0){
+				if((i + 1)%Constantes.TAMANHO_JANELA == 0){
 					bcn.enviarPacote(in, out, v);
 					v = new Vector<>();
 				}
 			}
-			if((i + 1)%TAMANHO_JANELA != 0 && !v.isEmpty()){
+			if((i + 1)%Constantes.TAMANHO_JANELA != 0 && !v.isEmpty()){
 				bcn.enviarPacote(in, out, v);
 			}
 			out.reset();
-			out.writeObject(FIM_TRANSMISSAO);
+			out.writeObject(Constantes.FIM_TRANSMISSAO);
 			break;
-		case SELECTIVE_REPEAT:
+		case Constantes.SELECTIVE_REPEAT:
 			ProtSelectiveRepeat sr = new ProtSelectiveRepeat();
 			Vector<int []> ve = new Vector<>();
 			int j;
@@ -121,16 +112,16 @@ public class Maquina implements Runnable{
 				
 				ve.addElement(crc.encriptar(gerarInformacao()));
 				
-				if((j + 1)%TAMANHO_JANELA == 0){
+				if((j + 1)%Constantes.TAMANHO_JANELA == 0){
 					sr.enviarPacote(in, out, ve);
 					ve = new Vector<>();
 				}
 			}
-			if((j + 1)%TAMANHO_JANELA != 0){
+			if((j + 1)%Constantes.TAMANHO_JANELA != 0){
 				sr.enviarPacote(in, out, ve);
 			}
 			out.reset();
-			out.writeObject(FIM_TRANSMISSAO);
+			out.writeObject(Constantes.FIM_TRANSMISSAO);
 			break;
 		default:
 			throw new Exception("TIPO DE PROTOCOLO INVÁLIDO!");
@@ -139,11 +130,11 @@ public class Maquina implements Runnable{
 	
 	private void funcionalidadeReceptor(ObjectInputStream in, ObjectOutputStream out) throws Exception{
 		CRC crc = new CRC();
-		while((Integer)in.readObject() != FIM_TRANSMISSAO){
+		while((Integer)in.readObject() != Constantes.FIM_TRANSMISSAO){
 			System.out.print("\nRec:             ");
 			
 			Vector pacote = (Vector) in.readObject();
-			int[] retorno = new int[TAMANHO_JANELA];
+			int[] retorno = new int[Constantes.TAMANHO_JANELA];
 			int i;
 			
 			for(i = 0; i < pacote.size(); i++){
@@ -154,12 +145,12 @@ public class Maquina implements Runnable{
 				}
 				System.out.print(i+1+"o Pacote: ");
 				int[] pct = (int[]) pacote.get(i);
-				for(int j = 0; j < NUM_BITS_PACOTE; j++){
+				for(int j = 0; j < Constantes.NUM_BITS_PACOTE; j++){
 					System.out.print(pct[j]+" ");;
 				}
 			}
 			
-			for(int k = i; k < TAMANHO_JANELA; k++){
+			for(int k = i; k < Constantes.TAMANHO_JANELA; k++){
 				retorno[k] = 2;
 			}
 			
@@ -169,10 +160,10 @@ public class Maquina implements Runnable{
 	}
 	
 	private int[] gerarInformacao(){
-		int[] info = new int[NUM_BITS_INFO];
+		int[] info = new int[Constantes.NUM_BITS_INFO];
 		Random r = new Random();
 		
-		for(int i = 0; i < NUM_BITS_INFO; i++){
+		for(int i = 0; i < Constantes.NUM_BITS_INFO; i++){
 			info[i] = r.nextBoolean() == true ? 1: 0;
 		}
 		

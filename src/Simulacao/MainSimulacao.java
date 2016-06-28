@@ -14,8 +14,8 @@ public class MainSimulacao {
 			
 			executor.execute(meio);
 			
-			Maquina comp1 = new Maquina("127.0.0.1", PORTA_ENTRADA, QTD_PACOTES, i);
-			Maquina comp2 = new Maquina("127.0.0.2", PORTA_SAIDA, QTD_PACOTES, i);
+			Maquina comp1 = new Maquina("127.0.0.1", PORTA_ENTRADA, QTD_PACOTES, 1);
+			Maquina comp2 = new Maquina("127.0.0.2", PORTA_SAIDA, QTD_PACOTES, 1);
 			
 			executor.execute(comp1);
 			executor.execute(comp2);
