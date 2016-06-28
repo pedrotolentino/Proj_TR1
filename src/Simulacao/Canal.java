@@ -3,8 +3,10 @@ package Simulacao;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Random;
 import java.util.Vector;
 
 public class Canal implements Runnable{
@@ -13,6 +15,8 @@ public class Canal implements Runnable{
 	static final int FIM_TRASMISSAO = -1;
 	static final int CANAL_PRONTO   = 10;
 	static final int TRANSMISSAO    = 20;
+	static final int PROB_PERDA     = 50;
+	static final int TAXA_RUIDO     = 1;
 	
 	public Canal(int portaEntrada, int portaSaida, int qtdPacotes){
 		try {
@@ -28,7 +32,7 @@ public class Canal implements Runnable{
 	}
 
 	public void run() {
-		Vector pacote = null;
+		Vector<int []> pacote = null;
 		ObjectInputStream entradaMaqEmi = null;
 		ObjectOutputStream saidaMaqEmi  = null;
 		ObjectInputStream entradaMaqRec = null;
@@ -64,9 +68,13 @@ public class Canal implements Runnable{
 					for(int j = 0; j < 11; j++){
 						System.out.print(pct[j]+" ");;
 					}
+					pacote.setElementAt(interferenciaRuido((int[]) pacote.get(i)), i);
 				}
+				saidaMaqRec.reset();
 				saidaMaqRec.writeObject(TRANSMISSAO);
+				saidaMaqRec.reset();
 				saidaMaqRec.writeObject(pacote);
+				saidaMaqEmi.reset();
 				saidaMaqEmi.writeObject(entradaMaqRec.readObject());
 			}
 			saidaMaqRec.writeObject(FIM_TRASMISSAO);
@@ -86,6 +94,30 @@ public class Canal implements Runnable{
 				System.out.println("Erro ao finalizar as streams");
 			}
 		}
+	}
+	
+	private boolean isPctTransferidoComSucesso(){
+		Random r = new Random();
 		
+		//Caso o número aleatório gerado esteja dentro da faixa de probabilidade de perda
+		//o pacote não é enviado para o receptor
+		if(r.nextInt(101) > PROB_PERDA){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
+	private int[] interferenciaRuido(int[] pacote){
+		Random r = new Random();
+		
+		for(int i = 0; i < pacote.length; i++){
+			//Caso o número aleatório gerado esteja dentro da faixa de probabilidade de ruído
+			//o pacote terá o bit em questão invertido
+			if(r.nextInt(101) < TAXA_RUIDO){
+				pacote[i] = pacote[i] == 0? 1: 0;
+			}
+		}
+		return pacote;
 	}
 }

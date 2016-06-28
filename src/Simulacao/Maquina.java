@@ -86,10 +86,9 @@ public class Maquina implements Runnable{
 		switch(tipoProtocolo){
 		case STOP_AND_WAIT:
 			for(int i = 0; i < numPacotes; i++){
-				Vector<Object> v = new Vector<>();
+				Vector<int []> v = new Vector<>();
 				ProtStopAndWait sw = new ProtStopAndWait();
 				
-				out.writeObject(TRANSMISSAO);
 				v.addElement(crc.encriptar(gerarInformacao()));
 				sw.enviarPacote(in, out, v);
 			}
@@ -160,6 +159,7 @@ public class Maquina implements Runnable{
 					System.out.print(pct[j]+" ");;
 				}
 			}
+			out.reset();
 			out.writeObject(retorno);
 		}
 	}
