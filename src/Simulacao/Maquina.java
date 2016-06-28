@@ -117,6 +117,7 @@ public class Maquina implements Runnable{
 					System.out.print(pct[j]+" ");;
 				}
 			}
+			out.reset();
 			out.writeObject(retorno);
 		}
 	}

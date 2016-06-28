@@ -12,7 +12,9 @@ public class ProtStopAndWait implements Protocolo{
 		int flagRetorno = -1;
 		
 		while(flagRetorno != ACK){
+			out.reset();
 			out.writeObject(TRANSMISSAO);
+			out.reset();
 			out.writeObject(pacote);
 			System.out.print("Emi -> ");
 			int[] ret = (int[]) in.readObject();

@@ -3,6 +3,7 @@ package Simulacao;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Random;
@@ -15,7 +16,7 @@ public class Canal implements Runnable{
 	static final int CANAL_PRONTO   = 10;
 	static final int TRANSMISSAO    = 20;
 	static final int PROB_PERDA     = 50;
-	static final int TAXA_RUIDO     = 70;
+	static final int TAXA_RUIDO     = 1;
 	
 	public Canal(int portaEntrada, int portaSaida, int qtdPacotes){
 		try {
@@ -68,8 +69,11 @@ public class Canal implements Runnable{
 					}
 					pacote.setElementAt(interferenciaRuido((int[]) pacote.get(i)), i);
 				}
+				saidaMaqRec.reset();
 				saidaMaqRec.writeObject(TRANSMISSAO);
+				saidaMaqRec.reset();
 				saidaMaqRec.writeObject(pacote);
+				saidaMaqEmi.reset();
 				saidaMaqEmi.writeObject(entradaMaqRec.readObject());
 			}
 			saidaMaqRec.writeObject(FIM_TRASMISSAO);
@@ -109,7 +113,7 @@ public class Canal implements Runnable{
 		for(int i = 0; i < pacote.length; i++){
 			//Caso o número aleatório gerado esteja dentro da faixa de probabilidade de ruído
 			//o pacote terá o bit em questão invertido
-			if(r.nextInt(101) <= TAXA_RUIDO){
+			if(r.nextInt(101) < TAXA_RUIDO){
 				pacote[i] = pacote[i] == 0? 1: 0;
 			}
 		}
