@@ -81,10 +81,9 @@ public class Maquina implements Runnable{
 		case STOP_AND_WAIT:
 			CRC crc = new CRC();
 			for(int i = 0; i < numPacotes; i++){
-				Vector<Object> v = new Vector<>();
+				Vector<int []> v = new Vector<>();
 				ProtStopAndWait sw = new ProtStopAndWait();
 				
-				out.writeObject(TRANSMISSAO);
 				v.addElement(crc.encriptar(gerarInformacao()));
 				sw.enviarPacote(in, out, v);
 			}

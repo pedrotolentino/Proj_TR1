@@ -15,7 +15,7 @@ public class Canal implements Runnable{
 	static final int CANAL_PRONTO   = 10;
 	static final int TRANSMISSAO    = 20;
 	static final int PROB_PERDA     = 50;
-	static final int TAXA_RUIDO     = 20;
+	static final int TAXA_RUIDO     = 70;
 	
 	public Canal(int portaEntrada, int portaSaida, int qtdPacotes){
 		try {
@@ -31,7 +31,7 @@ public class Canal implements Runnable{
 	}
 
 	public void run() {
-		Vector pacote = null;
+		Vector<int []> pacote = null;
 		ObjectInputStream entradaMaqEmi = null;
 		ObjectOutputStream saidaMaqEmi  = null;
 		ObjectInputStream entradaMaqRec = null;
@@ -66,6 +66,7 @@ public class Canal implements Runnable{
 					for(int j = 0; j < 11; j++){
 						System.out.print(pct[j]+" ");;
 					}
+					pacote.setElementAt(interferenciaRuido((int[]) pacote.get(i)), i);
 				}
 				saidaMaqRec.writeObject(TRANSMISSAO);
 				saidaMaqRec.writeObject(pacote);
@@ -93,6 +94,8 @@ public class Canal implements Runnable{
 	private boolean isPctTransferidoComSucesso(){
 		Random r = new Random();
 		
+		//Caso o número aleatório gerado esteja dentro da faixa de probabilidade de perda
+		//o pacote não é enviado para o receptor
 		if(r.nextInt(101) > PROB_PERDA){
 			return true;
 		}else{
@@ -104,6 +107,8 @@ public class Canal implements Runnable{
 		Random r = new Random();
 		
 		for(int i = 0; i < pacote.length; i++){
+			//Caso o número aleatório gerado esteja dentro da faixa de probabilidade de ruído
+			//o pacote terá o bit em questão invertido
 			if(r.nextInt(101) <= TAXA_RUIDO){
 				pacote[i] = pacote[i] == 0? 1: 0;
 			}

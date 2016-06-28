@@ -16,6 +16,10 @@ public class ProtStopAndWait implements Protocolo{
 			out.writeObject(pacote);
 			System.out.print("Emi -> ");
 			int[] ret = (int[]) in.readObject();
+			flagRetorno = ret[0];
+			if(flagRetorno == NACK){
+				System.out.println("Pacote com erro... Realizando reenvio");
+			}
 			System.out.println(ret[0] == 1?"ACK":"NACK");
 		}
 	}
