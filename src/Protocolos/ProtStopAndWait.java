@@ -25,5 +25,4 @@ public class ProtStopAndWait implements Protocolo{
 			System.out.println(ret[0] == 1?"ACK":"NACK");
 		}
 	}
-	
 }
