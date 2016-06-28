@@ -20,7 +20,7 @@ public class ProtStopAndWait implements Protocolo{
 			int[] ret = (int[]) in.readObject();
 			flagRetorno = ret[0];
 			if(flagRetorno == NACK){
-				System.out.println("Pacote com erro... Realizando reenvio");
+				System.out.print("Pacote com erro... Realizando reenvio ");
 			}
 			System.out.println(ret[0] == 1?"ACK":"NACK");
 		}

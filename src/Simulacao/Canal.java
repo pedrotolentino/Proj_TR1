@@ -3,7 +3,6 @@ package Simulacao;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Random;
@@ -16,7 +15,7 @@ public class Canal implements Runnable{
 	static final int CANAL_PRONTO   = 10;
 	static final int TRANSMISSAO    = 20;
 	static final int PROB_PERDA     = 50;
-	static final int TAXA_RUIDO     = 0;
+	static final int TAXA_RUIDO     = 1;
 	
 	public Canal(int portaEntrada, int portaSaida, int qtdPacotes){
 		try {

@@ -17,6 +17,7 @@ public class ProtSelectiveRepeat implements Protocolo{
 		int k = 0;
 		Vector novoPacote = new Vector();
 		while(flagRetorno != ACK){
+			flagRetorno = ACK;
 			out.reset();
 			out.writeObject(TRANSMISSAO);
 			if(ret == null){
@@ -31,8 +32,9 @@ public class ProtSelectiveRepeat implements Protocolo{
 						}
 					}
 				}
+				pacote = novoPacote;
 				out.reset();
-				out.writeObject(novoPacote);
+				out.writeObject(pacote);
 			}
 			System.out.print("Emi -> ");
 			try{
@@ -51,7 +53,6 @@ public class ProtSelectiveRepeat implements Protocolo{
 					k++;
 				}else if(ret[i] == ACK){
 					System.out.println("ACK do pacote "+(i+1));
-					flagRetorno = ACK;
 				}
 			}
 		}
