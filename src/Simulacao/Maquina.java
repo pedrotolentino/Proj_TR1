@@ -111,15 +111,9 @@ public class Maquina implements Runnable{
 			for(j = 0; j < numPacotes; j++){
 				
 				ve.addElement(crc.encriptar(gerarInformacao()));
-				
-				if((j + 1)%Constantes.TAMANHO_JANELA == 0){
-					sr.enviarPacote(in, out, ve);
-					ve = new Vector<>();
-				}
 			}
-			if((j + 1)%Constantes.TAMANHO_JANELA != 0){
-				sr.enviarPacote(in, out, ve);
-			}
+			sr.enviarPacote(in, out, ve);
+			
 			out.reset();
 			out.writeObject(Constantes.FIM_TRANSMISSAO);
 			break;

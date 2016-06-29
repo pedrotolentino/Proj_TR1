@@ -12,42 +12,39 @@ import Simulacao.Protocolo;
 public class ProtSelectiveRepeat implements Protocolo{	
 
 	public void enviarPacote(ObjectInputStream in, ObjectOutputStream out, Vector pacote) throws IOException, ClassNotFoundException {
-		int flagRetorno = -1;
+		int erro = 0;
 		int[] ret = null;
-		Vector novoPacote = null;
-		while(flagRetorno != Constantes.ACK){
-			flagRetorno = Constantes.ACK;
-			int erro = 0;
+		Vector novoPacote = new Vector<int[]>();
+		while(!pacote.isEmpty()){
+			for(int i = erro; i < Constantes.TAMANHO_JANELA && i < pacote.size(); i++){
+				novoPacote.add(pacote.get(i));
+			}
+			novoPacote.trimToSize();
 			out.reset();
 			out.writeObject(Constantes.TRANSMISSAO);
-			out.writeObject(pacote);
-
+			out.reset();
+			out.writeObject(novoPacote);
+			
 			System.out.print("Emi -> ");
 			try{
 				ret	 = (int[]) in.readObject();
 				
-			}catch(InterruptedByTimeoutException e){}
-						
-			System.out.println();
-			for(int i = 0; i < ret.length; i++){
-				if(ret[i] == Constantes.NACK){
-					flagRetorno = Constantes.NACK;
-					erro++;
-					System.out.println("NACK do pacote "+(i+1)+"");
-
-				}else if(ret[i] == Constantes.ACK){
-					System.out.println("ACK do pacote "+(i+1));
-				}
-			}
-			if(flagRetorno == Constantes.NACK){
-				novoPacote = new Vector<>(erro);
-				for(int i = 0; i < ret.length; i++){
+				System.out.println();
+				erro = 0;
+				for(int i = ret.length - 1; i >= 0 ; i--){
 					if(ret[i] == Constantes.NACK){
-						novoPacote.add(pacote.get(i));
+						erro++;
+						System.out.println("NACK do pacote "+(i+1));
+
+					}else if(ret[i] == Constantes.ACK){
+						System.out.println("ACK do pacote "+(i+1));
+						novoPacote.remove(i);
+						pacote.remove(i);
 					}
 				}
-				pacote = novoPacote;
-			}
+			}catch(InterruptedByTimeoutException e){
+				
+			}		
 		}
 	}
 }
