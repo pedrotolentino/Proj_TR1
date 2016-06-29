@@ -22,7 +22,7 @@ public class ProtGoBackN implements Protocolo{
 		int flagRetorno = -1;
 		int[] ret = null;
 		while(flagRetorno != Constantes.ACK){
-			pacotesEnviados =+ pacote.size();
+			pacotesEnviados += pacote.size();
 			out.reset();
 			out.writeObject(Constantes.TRANSMISSAO);
 			out.reset();

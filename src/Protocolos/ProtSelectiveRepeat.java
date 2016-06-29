@@ -24,7 +24,7 @@ public class ProtSelectiveRepeat implements Protocolo{
 				novoPacote.add(pacote.get(i));
 			}
 			novoPacote.trimToSize();
-			pacotesEnviados =+ novoPacote.size();
+			pacotesEnviados += novoPacote.size();
 			out.reset();
 			out.writeObject(Constantes.TRANSMISSAO);
 			out.reset();
