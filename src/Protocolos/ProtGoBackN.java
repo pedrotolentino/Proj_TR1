@@ -14,13 +14,19 @@ import Simulacao.Protocolo;
 
 public class ProtGoBackN implements Protocolo{
 
+	public int  pacoteErro;
+	public int  pacotesEnviados;
+	public long tProp;
+	
 	public void enviarPacote(ObjectInputStream in, ObjectOutputStream out, Vector pacote) throws IOException, ClassNotFoundException {
 		int flagRetorno = -1;
 		int[] ret = null;
 		while(flagRetorno != Constantes.ACK){
+			pacotesEnviados =+ pacote.size();
 			out.reset();
 			out.writeObject(Constantes.TRANSMISSAO);
 			out.reset();
+			tProp = System.currentTimeMillis();
 			out.writeObject(pacote);
 			System.out.print("Emi -> ");
 			try{
@@ -36,8 +42,10 @@ public class ProtGoBackN implements Protocolo{
 					if(ret[i] == Constantes.NACK){
 						System.out.println("NACK do pacote "+(i+1)+"... Realizando reenvio");
 						flagRetorno = Constantes.NACK;
+						pacoteErro++;
 						break;
 					}else if(ret[i] == Constantes.ACK){
+						tProp = System.currentTimeMillis() - tProp;
 						System.out.println("ACK do pacote "+(i+1));
 						flagRetorno = Constantes.ACK;
 					}

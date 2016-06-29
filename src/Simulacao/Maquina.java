@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Random;
 import java.util.Vector;
 
@@ -13,6 +15,11 @@ import Protocolos.ProtStopAndWait;
 import Verificacao.CRC;
 
 public class Maquina implements Runnable{
+	
+	ProtStopAndWait sw;
+	ProtGoBackN gbn;
+	ProtSelectiveRepeat sr;
+	
 	Socket  conn;
 	int     numPacotes;
 	int     tipoProtocolo;
@@ -73,20 +80,28 @@ public class Maquina implements Runnable{
 	
 	private void funcionalidadeEmissor(ObjectInputStream in, ObjectOutputStream out) throws Exception{
 		CRC crc = new CRC();
-		
+		int erros = 0; 
+		int enviados = 0;
+		double tProp = 0;
 		switch(tipoProtocolo){
 		case Constantes.STOP_AND_WAIT:
+			long tempoStopAndWait = System.currentTimeMillis();
 			for(int i = 0; i < numPacotes; i++){
 				Vector<int []> v = new Vector<>();
-				ProtStopAndWait sw = new ProtStopAndWait();
+				sw = new ProtStopAndWait();
 				
 				v.addElement(crc.encriptar(gerarInformacao()));
 				sw.enviarPacote(in, out, v);
+				erros =+ sw.pacoteErro;
+				enviados =+ sw.pacotesEnviados;
 			}
+			tProp = sw.tProp;
 			out.writeObject(Constantes.FIM_TRANSMISSAO);
+			calcularEstatistica(Constantes.STOP_AND_WAIT, System.currentTimeMillis() - tempoStopAndWait, erros, enviados, tProp);
 			break;
 		case Constantes.GO_BACK_N:
-			ProtGoBackN bcn = new ProtGoBackN();
+			long tempoGoBackN = System.currentTimeMillis();
+			gbn = new ProtGoBackN();
 			Vector<int []> v = new Vector<>();
 			int i;
 			for(i = 0; i < numPacotes; i++){
@@ -94,18 +109,25 @@ public class Maquina implements Runnable{
 				v.addElement(crc.encriptar(gerarInformacao()));
 				
 				if((i + 1)%Constantes.TAMANHO_JANELA == 0){
-					bcn.enviarPacote(in, out, v);
+					gbn.enviarPacote(in, out, v);
+					erros =+ gbn.pacoteErro;
+					enviados =+ gbn.pacotesEnviados;
 					v = new Vector<>();
 				}
 			}
 			if((i + 1)%Constantes.TAMANHO_JANELA != 0 && !v.isEmpty()){
-				bcn.enviarPacote(in, out, v);
+				gbn.enviarPacote(in, out, v);
+				erros =+ gbn.pacoteErro;
+				enviados =+ gbn.pacotesEnviados;
 			}
+			tProp = gbn.tProp;
 			out.reset();
 			out.writeObject(Constantes.FIM_TRANSMISSAO);
+			calcularEstatistica(Constantes.GO_BACK_N, System.currentTimeMillis() - tempoGoBackN, erros, enviados, tProp);
 			break;
 		case Constantes.SELECTIVE_REPEAT:
-			ProtSelectiveRepeat sr = new ProtSelectiveRepeat();
+			long tempoSelectiveRepeat = System.currentTimeMillis();
+			sr = new ProtSelectiveRepeat();
 			Vector<int []> ve = new Vector<>();
 			int j;
 			for(j = 0; j < numPacotes; j++){
@@ -113,15 +135,55 @@ public class Maquina implements Runnable{
 				ve.addElement(crc.encriptar(gerarInformacao()));
 			}
 			sr.enviarPacote(in, out, ve);
-			
+			erros = sr.pacoteErro;
+			enviados = sr.pacotesEnviados;
+			tProp = sr.tProp;
 			out.reset();
 			out.writeObject(Constantes.FIM_TRANSMISSAO);
+			calcularEstatistica(Constantes.SELECTIVE_REPEAT, System.currentTimeMillis() - tempoSelectiveRepeat, erros, enviados, tProp);
 			break;
 		default:
 			throw new Exception("TIPO DE PROTOCOLO INVÁLIDO!");
 		}
 	}
 	
+	private void calcularEstatistica(int tipoProtocolo, long tempo, int erros, int enviados, double tProp) throws Exception {
+		double taxaBits = (Constantes.NUM_BITS_INFO*numPacotes)*1000/tempo;
+		String logProtocolo = new String();
+		switch(tipoProtocolo){
+		case Constantes.STOP_AND_WAIT:
+			logProtocolo = "\n############### PROTOCOLO STOP AND WAIT ###############"
+					     + "\n## TOTAL DE PACOTES ENVIADOS: "+enviados
+					     + "\n## TOTAL DE PACOTES COM ERRO: "+erros
+					     + "\n## TEMPO TOTAL DE ENVIO: "+ tempo +"ms"
+					     + "\n## TAXA EM bits/s: "+taxaBits
+					     //+ "\n## EFICIÊNCIA DA TRANSMISSÃO: "+(Constantes.NUM_BITS_INFO/sw.tProp)/taxaBits
+					     + "\n#######################################################";
+			break;
+		case Constantes.GO_BACK_N:
+			logProtocolo = "\n############### PROTOCOLO GO BACK AND N ###############"
+				         + "\n## TOTAL DE PACOTES ENVIADOS: "+gbn.pacotesEnviados
+				         + "\n## TOTAL DE PACOTES COM ERRO: "+gbn.pacoteErro
+				         + "\n## TEMPO TOTAL DE ENVIO: "+ tempo +"ms"
+				         + "\n## TAXA EM bits/s: "+taxaBits
+				         //+ "\n## EFICIÊNCIA DA TRANSMISSÃO: "+(Constantes.NUM_BITS_INFO/gbn.tProp)/taxaBits
+				         + "\n#######################################################";
+			break;
+		case Constantes.SELECTIVE_REPEAT:
+			logProtocolo = "\n############### PROTOCOLO SELECTIVE REPEAT ############"
+				         + "\n## TOTAL DE PACOTES ENVIADOS: "+sr.pacotesEnviados
+				         + "\n## TOTAL DE PACOTES COM ERRO: "+sr.pacoteErro
+				         + "\n## TEMPO TOTAL DE ENVIO: "+ tempo +"ms"
+				         + "\n## TAXA EM bits/s: "+taxaBits
+						 //+ "\n## EFICIÊNCIA DA TRANSMISSÃO: "+(Constantes.NUM_BITS_INFO/sr.tProp)/taxaBits
+				         + "\n#######################################################";
+			break;
+		default:
+			throw new Exception("TIPO DE PROTOCOLO INVÁLIDO!");
+		}
+		System.out.println(logProtocolo);
+	}
+
 	private void funcionalidadeReceptor(ObjectInputStream in, ObjectOutputStream out) throws Exception{
 		CRC crc = new CRC();
 		while((Integer)in.readObject() != Constantes.FIM_TRANSMISSAO){
