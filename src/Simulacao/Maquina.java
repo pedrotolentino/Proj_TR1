@@ -115,7 +115,7 @@ public class Maquina implements Runnable{
 					v = new Vector<>();
 				}
 			}
-			if((i + 1)%Constantes.TAMANHO_JANELA != 0 && !v.isEmpty()){
+			if((i)%Constantes.TAMANHO_JANELA != 0 && !v.isEmpty()){
 				gbn.enviarPacote(in, out, v);
 				erros =+ gbn.pacoteErro;
 				enviados =+ gbn.pacotesEnviados;

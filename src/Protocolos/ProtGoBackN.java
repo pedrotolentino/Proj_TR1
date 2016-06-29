@@ -22,6 +22,8 @@ public class ProtGoBackN implements Protocolo{
 		int flagRetorno = -1;
 		int[] ret = null;
 		while(flagRetorno != Constantes.ACK){
+			flagRetorno = Constantes.ACK;
+			pacote.trimToSize();
 			pacotesEnviados += pacote.size();
 			out.reset();
 			out.writeObject(Constantes.TRANSMISSAO);
@@ -38,7 +40,7 @@ public class ProtGoBackN implements Protocolo{
 
 				System.out.println();
 				
-				for(int i = 0; i < ret.length; i++){
+				for(int i = ret.length - 1; i >= 0 ; i--){
 					if(ret[i] == Constantes.NACK){
 						System.out.println("NACK do pacote "+(i+1)+"... Realizando reenvio");
 						flagRetorno = Constantes.NACK;
@@ -47,7 +49,7 @@ public class ProtGoBackN implements Protocolo{
 					}else if(ret[i] == Constantes.ACK){
 						tProp = System.currentTimeMillis() - tProp;
 						System.out.println("ACK do pacote "+(i+1));
-						flagRetorno = Constantes.ACK;
+						pacote.remove(i);
 					}
 				}
 			}catch(SocketTimeoutException e){
