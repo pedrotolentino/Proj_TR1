@@ -12,7 +12,7 @@ public class Constantes {
 	public static final int CANAL_PRONTO   = 10;
 	public static final int TRANSMISSAO    = 20;
 	public static final int PROB_PERDA     = 50;
-	public static final int TAXA_RUIDO     = 1;
+	public static final int TAXA_RUIDO     = 5;
 	public static final int TEMPO_TIME_OUT = 500;
 	
 	//Constantes que definem o tipo de protocolo a ser utilizado

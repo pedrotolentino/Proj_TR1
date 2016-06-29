@@ -133,9 +133,9 @@ public class Maquina implements Runnable{
 			
 			for(i = 0; i < pacote.size(); i++){
 				if(crc.desencriptar((int[]) pacote.get(i))){
-					retorno[i] = 1;
+					retorno[i] = Constantes.ACK;
 				}else{
-					retorno[i] = 0;
+					retorno[i] = Constantes.NACK;
 				}
 				System.out.print(i+1+"o Pacote: ");
 				int[] pct = (int[]) pacote.get(i);
@@ -145,7 +145,7 @@ public class Maquina implements Runnable{
 			}
 			
 			for(int k = i; k < Constantes.TAMANHO_JANELA; k++){
-				retorno[k] = 2;
+				retorno[k] = Constantes.NAO_USADO;
 			}
 			
 			out.reset();

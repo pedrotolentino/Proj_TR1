@@ -24,6 +24,10 @@ public class ProtStopAndWait implements Protocolo{
 			try{
 				int[] ret = (int[]) in.readObject();
 				
+				if(ret[0] == Constantes.TIME_OUT){
+					throw new SocketTimeoutException();
+				}
+				
 				flagRetorno = ret[0];
 				if(flagRetorno == Constantes.NACK){
 					System.out.print("Pacote com erro... Realizando reenvio ");

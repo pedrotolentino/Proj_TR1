@@ -3,6 +3,7 @@ package Protocolos;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.SocketTimeoutException;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.InterruptedByTimeoutException;
 import java.util.Vector;
@@ -25,19 +26,24 @@ public class ProtGoBackN implements Protocolo{
 			try{
 				ret	 = (int[]) in.readObject();
 				
-			}catch(InterruptedByTimeoutException e){}
-			
-			System.out.println();
-			
-			for(int i = 0; i < ret.length; i++){
-				if(ret[i] == Constantes.NACK){
-					System.out.println("NACK do pacote "+(i+1)+"... Realizando reenvio");
-					flagRetorno = Constantes.NACK;
-					break;
-				}else if(ret[i] == Constantes.ACK){
-					System.out.println("ACK do pacote "+(i+1));
-					flagRetorno = Constantes.ACK;
+				if(ret[0] == Constantes.TIME_OUT){
+					throw new SocketTimeoutException();
 				}
+
+				System.out.println();
+				
+				for(int i = 0; i < ret.length; i++){
+					if(ret[i] == Constantes.NACK){
+						System.out.println("NACK do pacote "+(i+1)+"... Realizando reenvio");
+						flagRetorno = Constantes.NACK;
+						break;
+					}else if(ret[i] == Constantes.ACK){
+						System.out.println("ACK do pacote "+(i+1));
+						flagRetorno = Constantes.ACK;
+					}
+				}
+			}catch(SocketTimeoutException e){
+				System.out.println("Pacote não enviado por timeout... Realizando reenvio ");
 			}
 		}
 	}
