@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Random;
 import java.util.Vector;
 
@@ -13,19 +15,15 @@ import Protocolos.ProtStopAndWait;
 import Verificacao.CRC;
 
 public class Maquina implements Runnable{
+	
+	ProtStopAndWait sw;
+	ProtGoBackN gbn;
+	ProtSelectiveRepeat sr;
+	
 	Socket  conn;
 	int     numPacotes;
 	int     tipoProtocolo;
 	boolean ehEmissor;
-	static final int FIM_TRANSMISSAO  = -1;
-	static final int STOP_AND_WAIT    =  1;
-	static final int GO_BACK_N        =  2;
-	static final int SELECTIVE_REPEAT =  3;	
-	static final int NUM_BITS_INFO    =  8;
-	static final int NUM_BITS_PACOTE  = 11;
-	static final int TAMANHO_JANELA   =  5;
-	static final int CANAL_PRONTO     = 10;
-	static final int TRANSMISSAO      = 20;
 	
 	public Maquina(String ip, int porta, int qtdPacotes, int protocolo){
 		try {
@@ -50,7 +48,7 @@ public class Maquina implements Runnable{
 			
 			saidaCanal.writeObject(ehEmissor?"Emissora": "Receptora");
 			
-			if((Integer)entradaCanal.readObject() == CANAL_PRONTO && ehEmissor){
+			if((Integer)entradaCanal.readObject() == Constantes.CANAL_PRONTO && ehEmissor){
 				System.out.println("Emissor conectado e transferindo");
 				Thread.sleep(300);
 				funcionalidadeEmissor(entradaCanal, saidaCanal);
@@ -82,93 +80,135 @@ public class Maquina implements Runnable{
 	
 	private void funcionalidadeEmissor(ObjectInputStream in, ObjectOutputStream out) throws Exception{
 		CRC crc = new CRC();
-		
+		int erros = 0; 
+		int enviados = 0;
+		double tProp = 0;
 		switch(tipoProtocolo){
-		case STOP_AND_WAIT:
+		case Constantes.STOP_AND_WAIT:
+			long tempoStopAndWait = System.currentTimeMillis();
+			sw = new ProtStopAndWait();
 			for(int i = 0; i < numPacotes; i++){
 				Vector<int []> v = new Vector<>();
-				ProtStopAndWait sw = new ProtStopAndWait();
 				
 				v.addElement(crc.encriptar(gerarInformacao()));
 				sw.enviarPacote(in, out, v);
+				erros =+ sw.pacoteErro;
+				enviados =+ sw.pacotesEnviados;
 			}
-			out.writeObject(FIM_TRANSMISSAO);
+			tProp = sw.tProp;
+			out.writeObject(Constantes.FIM_TRANSMISSAO);
+			calcularEstatistica(Constantes.STOP_AND_WAIT, System.currentTimeMillis() - tempoStopAndWait, erros, enviados, tProp);
 			break;
-		case GO_BACK_N:
-			ProtGoBackN bcn = new ProtGoBackN();
-			Vector<Object> v = new Vector<>();
+		case Constantes.GO_BACK_N:
+			long tempoGoBackN = System.currentTimeMillis();
+			gbn = new ProtGoBackN();
+			Vector<int []> v = new Vector<>();
 			int i;
 			for(i = 0; i < numPacotes; i++){
 				
 				v.addElement(crc.encriptar(gerarInformacao()));
 				
-				if((i + 1)%TAMANHO_JANELA == 0){
-					out.writeObject(TRANSMISSAO);
-					bcn.enviarPacote(in, out, v);
+				if((i + 1)%Constantes.TAMANHO_JANELA == 0){
+					gbn.enviarPacote(in, out, v);
+					erros =+ gbn.pacoteErro;
+					enviados =+ gbn.pacotesEnviados;
 					v = new Vector<>();
 				}
 			}
-			if((i + 1)%TAMANHO_JANELA != 0){
-				out.writeObject(TRANSMISSAO);
-				bcn.enviarPacote(in, out, v);
+			if((i + 1)%Constantes.TAMANHO_JANELA != 0 && !v.isEmpty()){
+				gbn.enviarPacote(in, out, v);
+				erros =+ gbn.pacoteErro;
+				enviados =+ gbn.pacotesEnviados;
 			}
-			out.writeObject(FIM_TRANSMISSAO);
+			tProp = gbn.tProp;
+			out.reset();
+			out.writeObject(Constantes.FIM_TRANSMISSAO);
+			calcularEstatistica(Constantes.GO_BACK_N, System.currentTimeMillis() - tempoGoBackN, erros, enviados, tProp);
 			break;
-		case SELECTIVE_REPEAT:
-			ProtSelectiveRepeat sr = new ProtSelectiveRepeat();
-			Vector<Object> ve = new Vector<>();
+		case Constantes.SELECTIVE_REPEAT:
+			long tempoSelectiveRepeat = System.currentTimeMillis();
+			sr = new ProtSelectiveRepeat();
+			Vector<int []> ve = new Vector<>();
 			int j;
 			for(j = 0; j < numPacotes; j++){
 				
 				ve.addElement(crc.encriptar(gerarInformacao()));
-				
-				if((j + 1)%TAMANHO_JANELA == 0){
-					out.writeObject(TRANSMISSAO);
-					sr.enviarPacote(in, out, ve);
-					ve = new Vector<>();
-				}
 			}
-			if((j + 1)%TAMANHO_JANELA != 0){
-				out.writeObject(TRANSMISSAO);
-				sr.enviarPacote(in, out, ve);
-			}
-			out.writeObject(FIM_TRANSMISSAO);
+			sr.enviarPacote(in, out, ve);
+			erros = sr.pacoteErro;
+			enviados = sr.pacotesEnviados;
+			tProp = sr.tProp;
+			out.reset();
+			out.writeObject(Constantes.FIM_TRANSMISSAO);
+			calcularEstatistica(Constantes.SELECTIVE_REPEAT, System.currentTimeMillis() - tempoSelectiveRepeat, erros, enviados, tProp);
 			break;
 		default:
 			throw new Exception("TIPO DE PROTOCOLO INVÁLIDO!");
 		}
 	}
 	
+	private void calcularEstatistica(int tipoProtocolo, long tempo, int erros, int enviados, double tProp) throws Exception {
+		double taxaBits = (Constantes.NUM_BITS_INFO*numPacotes)*1000/tempo;
+		StringBuilder logProtocolo = new StringBuilder();
+		switch(tipoProtocolo){
+		case Constantes.STOP_AND_WAIT:
+			logProtocolo.append("\n############### PROTOCOLO STOP AND WAIT ###############");
+			break;
+		case Constantes.GO_BACK_N:
+			logProtocolo.append("\n############### PROTOCOLO GO BACK AND N ###############");
+			break;
+		case Constantes.SELECTIVE_REPEAT:
+			logProtocolo.append("\n############### PROTOCOLO SELECTIVE REPEAT ############");
+			break;
+		default:
+			throw new Exception("TIPO DE PROTOCOLO INVÁLIDO!");
+		}
+		logProtocolo.append("\n## TOTAL DE PACOTES ENVIADOS: "+enviados
+				         + "\n## TOTAL DE PACOTES COM ERRO: "+erros
+				         + "\n## TEMPO TOTAL DE ENVIO: "+ tempo+"ms"
+				         + "\n## TAXA EM bits/s: "+taxaBits
+				         + "\n## TEMPO DE PROCESSAMENTO: "+tProp+"ms"
+						 //+ "\n## EFICIÊNCIA DA TRANSMISSÃO: "+(Constantes.NUM_BITS_INFO/tProp)/taxaBits
+				         + "\n#######################################################");
+		System.out.println(logProtocolo);
+	}
+
 	private void funcionalidadeReceptor(ObjectInputStream in, ObjectOutputStream out) throws Exception{
 		CRC crc = new CRC();
-		while((Integer)in.readObject() != FIM_TRANSMISSAO){
+		while((Integer)in.readObject() != Constantes.FIM_TRANSMISSAO){
 			System.out.print("\nRec:             ");
 			
 			Vector pacote = (Vector) in.readObject();
-			int[] retorno = new int[TAMANHO_JANELA];
+			int[] retorno = new int[Constantes.TAMANHO_JANELA];
+			int i;
 			
-			for(int i = 0; i < pacote.size(); i++){
+			for(i = 0; i < pacote.size(); i++){
 				if(crc.desencriptar((int[]) pacote.get(i))){
-					retorno[i] = 1;
+					retorno[i] = Constantes.ACK;
 				}else{
-					retorno[i] = 0;
+					retorno[i] = Constantes.NACK;
 				}
 				System.out.print(i+1+"o Pacote: ");
 				int[] pct = (int[]) pacote.get(i);
-				for(int j = 0; j < NUM_BITS_PACOTE; j++){
+				for(int j = 0; j < Constantes.NUM_BITS_PACOTE; j++){
 					System.out.print(pct[j]+" ");;
 				}
 			}
+			
+			for(int k = i; k < Constantes.TAMANHO_JANELA; k++){
+				retorno[k] = Constantes.NAO_USADO;
+			}
+			
 			out.reset();
 			out.writeObject(retorno);
 		}
 	}
 	
 	private int[] gerarInformacao(){
-		int[] info = new int[NUM_BITS_INFO];
+		int[] info = new int[Constantes.NUM_BITS_INFO];
 		Random r = new Random();
 		
-		for(int i = 0; i < NUM_BITS_INFO; i++){
+		for(int i = 0; i < Constantes.NUM_BITS_INFO; i++){
 			info[i] = r.nextBoolean() == true ? 1: 0;
 		}
 		
