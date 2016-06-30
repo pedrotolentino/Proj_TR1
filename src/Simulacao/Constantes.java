@@ -11,7 +11,7 @@ public class Constantes {
 	public static final int FIM_TRANSMISSAO = -1;
 	public static final int CANAL_PRONTO   = 10;
 	public static final int TRANSMISSAO    = 20;
-	public static final int PROB_PERDA     = 10;
+	public static final int PROB_PERDA     = 5;
 	public static final int TAXA_RUIDO     = 2;
 	public static final int TEMPO_TIME_OUT = 500;
 	

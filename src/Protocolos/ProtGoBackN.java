@@ -27,7 +27,6 @@ public class ProtGoBackN implements Protocolo{
 			out.reset();
 			tProp = System.currentTimeMillis();
 			out.writeObject(pacote);
-			System.out.print("Emi -> ");
 			try{
 				ret	 = (int[]) in.readObject();
 				
@@ -35,23 +34,18 @@ public class ProtGoBackN implements Protocolo{
 					flagRetorno = Constantes.TIME_OUT;
 					throw new SocketTimeoutException();
 				}
-
-				System.out.println();
 				
 				for(int i = ret.length - 1; i >= 0 ; i--){
 					if(ret[i] == Constantes.NACK){
-						System.out.println("NACK do pacote "+(i+1)+"... Realizando reenvio");
 						flagRetorno = Constantes.NACK;
 						pacoteErro++;
 						break;
 					}else if(ret[i] == Constantes.ACK){
 						tProp = System.currentTimeMillis() - tProp;
-						System.out.println("ACK do pacote "+(i+1));
 						pacote.remove(i);
 					}
 				}
 			}catch(SocketTimeoutException e){
-				System.out.println("Pacote n�o enviado por timeout... Realizando reenvio ");
 				pacoteErro += pacote.size();
 			}
 		}

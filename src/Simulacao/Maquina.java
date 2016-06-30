@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Random;
 import java.util.Vector;
 
@@ -40,7 +38,6 @@ public class Maquina implements Runnable{
 		ObjectInputStream entradaCanal = null;
 		ObjectOutputStream saidaCanal = null;
 		try {
-			System.out.println("Maquina "+conn.getInetAddress()+" conectada com o servidor na porta "+conn.getPort());
 			saidaCanal  = new ObjectOutputStream(conn.getOutputStream());
 			entradaCanal = new ObjectInputStream(conn.getInputStream());
 			 
@@ -50,11 +47,9 @@ public class Maquina implements Runnable{
 			saidaCanal.writeObject(ehEmissor?"Emissora": "Receptora");
 			
 			if((Integer)entradaCanal.readObject() == Constantes.CANAL_PRONTO && ehEmissor){
-				System.out.println("Emissor conectado e transferindo");
 				Thread.sleep(300);
 				funcionalidadeEmissor(entradaCanal, saidaCanal);
 			}else{
-				System.out.println("Receptor conectado e transferindo");
 				Thread.sleep(300);
 				funcionalidadeReceptor(entradaCanal, saidaCanal);
 			}
@@ -169,7 +164,6 @@ public class Maquina implements Runnable{
 				         + "\n## TEMPO TOTAL DE ENVIO: "+ tempo+"ms"
 				         + "\n## TAXA EM bits/s: "+taxaBits
 				         + "\n## TEMPO DE TRANSMISSAO DE UM PACOTE: "+tProp+"ms"
-						 //+ "\n## EFICIÊNCIA DA TRANSMISSÃO: "+(Constantes.NUM_BITS_INFO/tProp)/taxaBits
 				         + "\n#######################################################");
 		System.out.println(logProtocolo);
 	}
@@ -177,7 +171,6 @@ public class Maquina implements Runnable{
 	private void funcionalidadeReceptor(ObjectInputStream in, ObjectOutputStream out) throws Exception{
 		CRC crc = new CRC();
 		while((Integer)in.readObject() != Constantes.FIM_TRANSMISSAO){
-			System.out.print("\nRec:             ");
 			
 			Vector pacote = (Vector) in.readObject();
 			int[] retorno = new int[Constantes.TAMANHO_JANELA];
@@ -188,11 +181,6 @@ public class Maquina implements Runnable{
 					retorno[i] = Constantes.ACK;
 				}else{
 					retorno[i] = Constantes.NACK;
-				}
-				System.out.print(i+1+"o Pacote: ");
-				int[] pct = (int[]) pacote.get(i);
-				for(int j = 0; j < Constantes.NUM_BITS_PACOTE; j++){
-					System.out.print(pct[j]+" ");;
 				}
 			}
 			

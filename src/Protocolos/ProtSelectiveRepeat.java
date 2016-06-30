@@ -31,11 +31,9 @@ public class ProtSelectiveRepeat implements Protocolo{
 			tProp = System.currentTimeMillis();
 			out.writeObject(novoPacote);
 			
-			System.out.print("Emi -> ");
 			try{
 				ret	 = (int[]) in.readObject();
 				
-				System.out.println();
 				erro = 0;
 				for(int i = ret.length - 1; i >= 0 ; i--){
 					if(ret[0] == Constantes.TIME_OUT){
@@ -43,17 +41,13 @@ public class ProtSelectiveRepeat implements Protocolo{
 					}else if(ret[i] == Constantes.NACK){
 						erro++;
 						pacoteErro++;
-						System.out.println("NACK do pacote "+(i+1));
-
 					}else if(ret[i] == Constantes.ACK && (novoPacote.size() >= i+1) && (pacote.size() >= i+1)){
 						tProp = System.currentTimeMillis() - tProp;
-						System.out.println("ACK do pacote "+(i+1));
 						novoPacote.remove(i);
 						pacote.remove(i);
 					}
 				}
 			}catch(SocketTimeoutException e){
-				System.out.println("Pacote n�o enviado por timeout... Realizando reenvio ");
 				pacoteErro += novoPacote.size();
 				novoPacote.clear();
 			}		

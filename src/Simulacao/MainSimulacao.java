@@ -1,6 +1,5 @@
 package Simulacao;
 
-import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -11,7 +10,7 @@ public class MainSimulacao {
 	
 	private static final int PORTA_ENTRADA = 1234;
 	private static final int PORTA_SAIDA   = 1235;
-	private static final int QTD_PACOTES   = 23;
+	private static final int QTD_PACOTES   = 1000;
 	
 	public static void executarSimulacao(Runnable meio){
 		for (int i = 1; i <= 3; i++){

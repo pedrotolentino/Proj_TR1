@@ -16,9 +16,6 @@ public class Canal implements Runnable{
 		try {
 			this.canalEntrada = new ServerSocket(portaEntrada);
 			this.canalSaida   = new ServerSocket(portaSaida);
-			System.out.println("Entrada do canal escutando na porta "+canalEntrada.getLocalPort());
-			System.out.println("Saida do canal escutando na porta "+canalSaida.getLocalPort());
-			
 		} catch (IOException e) {
 			System.out.println("ERRO ao instanciar o Canal");
 			e.printStackTrace();
@@ -31,7 +28,6 @@ public class Canal implements Runnable{
 		ObjectOutputStream saidaMaqEmi  = null;
 		ObjectInputStream entradaMaqRec = null;
 		ObjectOutputStream saidaMaqRec  = null; 
-		System.out.println("Aguardando conexao dos clientes...");
 		try {
 			//Esperando a conexao das maquinas
 			Socket maqEmissora = canalEntrada.accept();
@@ -43,14 +39,14 @@ public class Canal implements Runnable{
 			saidaMaqEmi  = new ObjectOutputStream(maqEmissora.getOutputStream());
 			saidaMaqEmi.reset();
 			saidaMaqEmi.writeObject(true);
-			System.out.println("Maquina "+entradaMaqEmi.readObject()+" conectada com o canal ");
+			entradaMaqEmi.readObject();
 			
 			//Realizando a conexao da maquina receptora
 			entradaMaqRec = new ObjectInputStream(maqReceptora.getInputStream());
 			saidaMaqRec  = new ObjectOutputStream(maqReceptora.getOutputStream());
 			saidaMaqRec.reset();
 			saidaMaqRec.writeObject(false);
-			System.out.println("Maquina "+entradaMaqRec.readObject()+" conectada com o canal");
+			entradaMaqRec.readObject();
 			
 			saidaMaqRec.reset();
 			saidaMaqRec.writeObject(Constantes.CANAL_PRONTO);
@@ -59,13 +55,7 @@ public class Canal implements Runnable{
 			
 			while((Integer)entradaMaqEmi.readObject() != Constantes.FIM_TRANSMISSAO){
 				pacote  = (Vector) entradaMaqEmi.readObject();
-				System.out.print(" Canal -> ");
 				for(int i = 0; i < pacote.size(); i++){
-					System.out.print(i+1+"o Pacote: ");
-					int[] pct = (int[]) pacote.get(i);
-					for(int j = 0; j < 11; j++){
-						System.out.print(pct[j]+" ");;
-					}
 					pacote.setElementAt(interferenciaRuido((int[]) pacote.get(i)), i);
 				}
 				if(!isPctTransferidoComSucesso()){

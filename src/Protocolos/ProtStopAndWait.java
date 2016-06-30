@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.SocketTimeoutException;
-import java.nio.channels.InterruptedByTimeoutException;
 import java.util.Vector;
 
 import Simulacao.Constantes;
@@ -25,7 +24,6 @@ public class ProtStopAndWait implements Protocolo{
 			tProp = System.currentTimeMillis();
 			out.writeObject(pacote);
 			pacotesEnviados++;
-			System.out.print("Emi -> ");
 
 			try{
 				int[] ret = (int[]) in.readObject();
@@ -35,14 +33,11 @@ public class ProtStopAndWait implements Protocolo{
 				if(flagRetorno == Constantes.TIME_OUT){
 					throw new SocketTimeoutException();
 				}else if(flagRetorno == Constantes.NACK){
-					System.out.print("Pacote com erro... Realizando reenvio ");
 					pacoteErro++;
 				}else{
 					tProp = System.currentTimeMillis() - tProp;
 				}
-				System.out.println(ret[0] == 1?"ACK":"NACK");
 			}catch(SocketTimeoutException e){
-				System.out.println("Pacote não enviado por timeout... Realizando reenvio ");
 				pacoteErro++;
 			}
 		}
