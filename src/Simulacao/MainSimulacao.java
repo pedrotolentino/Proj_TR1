@@ -13,7 +13,7 @@ public class MainSimulacao {
 	
 	private static final int PORTA_ENTRADA = 1234;
 	private static final int PORTA_SAIDA   = 1235;
-	private static final int QTD_PACOTES   = 1000;
+	private static final int QTD_PACOTES   = 23;
 	
 	public static void executarSimulacao(Runnable meio){
 		for (int i = 1; i <= 3; i++){
@@ -21,8 +21,8 @@ public class MainSimulacao {
 			
 			executor.execute(meio);
 			
-			comp1 = new Maquina("127.0.0.1", PORTA_ENTRADA, QTD_PACOTES, i);
-			comp2 = new Maquina("127.0.0.2", PORTA_SAIDA, QTD_PACOTES, i);
+			comp1 = new Maquina("127.0.0.1", PORTA_ENTRADA, QTD_PACOTES, 1);
+			comp2 = new Maquina("127.0.0.2", PORTA_SAIDA, QTD_PACOTES, 1);
 			
 			executor.execute(comp1);
 			executor.execute(comp2);
@@ -38,7 +38,7 @@ public class MainSimulacao {
 		
 		executarSimulacao(cabo);
 		
-		System.out.println("## O PROCESSO FOI EXECUTADO COM SUCESSO, ENVIANDO "+QTD_PACOTES+" PACOTES");
+		System.out.println("## O PROCESSO FOI EXECUTADO COM SUCESSO, FORAM ENVIADOS "+QTD_PACOTES+" PACOTES");
 		
 	}
 }

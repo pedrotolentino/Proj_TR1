@@ -167,7 +167,7 @@ public class Maquina implements Runnable{
 				         + "\n## TOTAL DE PACOTES COM ERRO: "+erros
 				         + "\n## TEMPO TOTAL DE ENVIO: "+ tempo+"ms"
 				         + "\n## TAXA EM bits/s: "+taxaBits
-				         + "\n## TEMPO DE PROCESSAMENTO: "+tProp+"ms"
+				         + "\n## TEMPO DE PROPAGACAO DE UM PACOTE: "+tProp+"ms"
 						 //+ "\n## EFICIÊNCIA DA TRANSMISSÃO: "+(Constantes.NUM_BITS_INFO/tProp)/taxaBits
 				         + "\n#######################################################");
 		System.out.println(logProtocolo);

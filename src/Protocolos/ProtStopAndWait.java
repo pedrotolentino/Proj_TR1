@@ -30,12 +30,11 @@ public class ProtStopAndWait implements Protocolo{
 			try{
 				int[] ret = (int[]) in.readObject();
 				
-				if(ret[0] == Constantes.TIME_OUT){
-					throw new SocketTimeoutException();
-				}
-				
 				flagRetorno = ret[0];
-				if(flagRetorno == Constantes.NACK){
+				
+				if(flagRetorno == Constantes.TIME_OUT){
+					throw new SocketTimeoutException();
+				}else if(flagRetorno == Constantes.NACK){
 					System.out.print("Pacote com erro... Realizando reenvio ");
 					pacoteErro++;
 				}else{
@@ -44,6 +43,7 @@ public class ProtStopAndWait implements Protocolo{
 				System.out.println(ret[0] == 1?"ACK":"NACK");
 			}catch(SocketTimeoutException e){
 				System.out.println("Pacote não enviado por timeout... Realizando reenvio ");
+				pacoteErro++;
 			}
 		}
 	}

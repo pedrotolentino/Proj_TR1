@@ -54,6 +54,7 @@ public class ProtGoBackN implements Protocolo{
 				}
 			}catch(SocketTimeoutException e){
 				System.out.println("Pacote não enviado por timeout... Realizando reenvio ");
+				pacoteErro += pacote.size();
 			}
 		}
 	}

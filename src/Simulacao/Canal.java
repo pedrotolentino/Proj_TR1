@@ -64,28 +64,28 @@ public class Canal implements Runnable{
 					}
 					pacote.setElementAt(interferenciaRuido((int[]) pacote.get(i)), i);
 				}
-//				if(!isPctTransferidoComSucesso()){
-//					Thread.sleep(Constantes.TEMPO_TIME_OUT);
-//					int[] tOut = {Constantes.TIME_OUT};
-// 					saidaMaqEmi.reset();
-//					saidaMaqEmi.writeObject(tOut);
-//					continue;
-//				}
-				saidaMaqRec.reset();
-				saidaMaqRec.writeObject(Constantes.TRANSMISSAO);
-				saidaMaqRec.reset();
-				saidaMaqRec.writeObject(pacote);
-				
-				/*if(!isPctTransferidoComSucesso()){
+				if(!isPctTransferidoComSucesso()){
 					Thread.sleep(Constantes.TEMPO_TIME_OUT);
 					int[] tOut = {Constantes.TIME_OUT};
  					saidaMaqEmi.reset();
 					saidaMaqEmi.writeObject(tOut);
 					continue;
-				}else{*/
+				}
+				saidaMaqRec.reset();
+				saidaMaqRec.writeObject(Constantes.TRANSMISSAO);
+				saidaMaqRec.reset();
+				saidaMaqRec.writeObject(pacote);
+				
+				if(!isPctTransferidoComSucesso()){
+					Thread.sleep(Constantes.TEMPO_TIME_OUT);
+					int[] tOut = {Constantes.TIME_OUT};
+ 					saidaMaqEmi.reset();
+					saidaMaqEmi.writeObject(tOut);
+					continue;
+				}else{
 					saidaMaqEmi.reset();
 					saidaMaqEmi.writeObject(entradaMaqRec.readObject());
-				//}
+				}
 			}
 			saidaMaqRec.writeObject(Constantes.FIM_TRANSMISSAO);
 		} catch (IOException e) {
@@ -94,9 +94,9 @@ public class Canal implements Runnable{
 		} catch (ClassNotFoundException e) {
 			System.out.println("Classe nao encontrada no Canal!");
 			e.printStackTrace();
-//		} catch (InterruptedException e) {
-//			System.out.println("Thread interrompida no timeout!");
-//			e.printStackTrace();
+		} catch (InterruptedException e) {
+			System.out.println("Thread interrompida no timeout!");
+			e.printStackTrace();
 		}finally{
 			try{
 				entradaMaqEmi.close();
