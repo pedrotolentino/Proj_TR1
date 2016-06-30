@@ -76,16 +76,16 @@ public class Canal implements Runnable{
 				saidaMaqRec.reset();
 				saidaMaqRec.writeObject(pacote);
 				
-				if(!isPctTransferidoComSucesso()){
-					Thread.sleep(Constantes.TEMPO_TIME_OUT);
-					int[] tOut = {Constantes.TIME_OUT};
- 					saidaMaqEmi.reset();
-					saidaMaqEmi.writeObject(tOut);
-					continue;
-				}else{
+//				if(!isPctTransferidoComSucesso()){
+//					Thread.sleep(Constantes.TEMPO_TIME_OUT);
+//					int[] tOut = {Constantes.TIME_OUT};
+// 					saidaMaqEmi.reset();
+//					saidaMaqEmi.writeObject(tOut);
+//					continue;
+//				}else{
 					saidaMaqEmi.reset();
 					saidaMaqEmi.writeObject(entradaMaqRec.readObject());
-				}
+//				}
 			}
 			saidaMaqRec.writeObject(Constantes.FIM_TRANSMISSAO);
 		} catch (IOException e) {

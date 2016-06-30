@@ -35,6 +35,7 @@ public class ProtGoBackN implements Protocolo{
 				ret	 = (int[]) in.readObject();
 				
 				if(ret[0] == Constantes.TIME_OUT){
+					flagRetorno = Constantes.TIME_OUT;
 					throw new SocketTimeoutException();
 				}
 
