@@ -1,7 +1,5 @@
 package Verificacao;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 
 public class CRC {
 
@@ -67,68 +65,20 @@ public class CRC {
 		return false;
 	}
 	
-	private int[] divide(int dividendo[], int[] polGerador2, int resto[])
-	{
+	private int[] divide(int dividendo[], int[] polGerador2, int resto[]){
 		int atual = 0;
 		while(true)
 		{
 			for(int i=0; i < polGerador2.length; i++){
 				resto[atual+i] = (resto[atual+i] ^ polGerador2[i]);
 			}
-			while(resto[atual] == 0 && atual!=resto.length-1){
+			while(resto[atual] == 0 && atual != resto.length-1){
 				atual++;
 			}
-			if((resto.length-atual) < polGerador2.length){
+			if((resto.length - atual) < polGerador2.length){
 				break;
 			}
 		}
 		return resto;
-	}
-	
-	public static void main(String args[]){
-		
-		CRC crc = new CRC();
-
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		System.out.println("Começando.. Entre com o número binário de 8 dígitos (um bit a cada enter):");
-		
-		int pacote[]     = new int[8];
-		int pacoteEncr[] = new int[11];
-				
-		try{
-			for(int i=0; i < 8; i++){
-				pacote[i]=Integer.parseInt(br.readLine());
-			}
-			pacoteEncr = crc.encriptar(pacote);
-		
-		}catch(Exception e){
-			e.printStackTrace();
-			System.out.println("Quebrou!");
-		}
-			
-		System.out.println("Pacote encriptado: ");		
-		
-		for(int i=0; i < pacoteEncr.length; i++){
-			System.out.print(pacoteEncr[i]);        
-			System.out.println();
-		}
-		
-		System.out.println("Entre com o número binário de 11 dígitos a ser desencriptado (um bit a cada enter):");
-		
-		try{
-			for(int i=0; i < 11; i++){
-				pacoteEncr[i]=Integer.parseInt(br.readLine());
-			}
-			
-			if(crc.desencriptar(pacoteEncr)){
-				System.out.println("Correto!");
-			}else{
-				System.out.println("Errado!");
-			}
-			
-		}catch(Exception e){
-			e.printStackTrace();
-			System.out.println("Quebrou2!");
-		}
 	}
 }
