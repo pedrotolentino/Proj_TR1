@@ -3,7 +3,7 @@ package Protocolos;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.nio.channels.InterruptedByTimeoutException;
+import java.net.SocketTimeoutException;
 import java.util.Vector;
 
 import Simulacao.Constantes;
@@ -38,20 +38,24 @@ public class ProtSelectiveRepeat implements Protocolo{
 				System.out.println();
 				erro = 0;
 				for(int i = ret.length - 1; i >= 0 ; i--){
-					if(ret[i] == Constantes.NACK){
+					if(ret[0] == Constantes.TIME_OUT){
+						throw new SocketTimeoutException();
+					}else if(ret[i] == Constantes.NACK){
 						erro++;
 						pacoteErro++;
 						System.out.println("NACK do pacote "+(i+1));
 
-					}else if(ret[i] == Constantes.ACK){
+					}else if(ret[i] == Constantes.ACK && (novoPacote.size() >= i+1) && (pacote.size() >= i+1)){
 						tProp = System.currentTimeMillis() - tProp;
 						System.out.println("ACK do pacote "+(i+1));
 						novoPacote.remove(i);
 						pacote.remove(i);
 					}
 				}
-			}catch(InterruptedByTimeoutException e){
-				
+			}catch(SocketTimeoutException e){
+				System.out.println("Pacote n�o enviado por timeout... Realizando reenvio ");
+				pacoteErro += novoPacote.size();
+				novoPacote.clear();
 			}		
 		}
 	}

@@ -9,11 +9,9 @@ public class MainSimulacao {
 	private static Maquina comp1 = null;
 	private static Maquina comp2 = null;
 	
-	private static Collection<String> logs;
-	
 	private static final int PORTA_ENTRADA = 1234;
 	private static final int PORTA_SAIDA   = 1235;
-	private static final int QTD_PACOTES   = 1000;
+	private static final int QTD_PACOTES   = 23;
 	
 	public static void executarSimulacao(Runnable meio){
 		for (int i = 1; i <= 3; i++){
@@ -38,7 +36,7 @@ public class MainSimulacao {
 		
 		executarSimulacao(cabo);
 		
-		System.out.println("## O PROCESSO FOI EXECUTADO COM SUCESSO, ENVIANDO "+QTD_PACOTES+" PACOTES");
+		System.out.println("## O PROCESSO FOI EXECUTADO COM SUCESSO, FORAM ENVIADOS "+QTD_PACOTES+" PACOTES");
 		
 	}
 }
