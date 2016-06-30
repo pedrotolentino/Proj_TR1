@@ -41,16 +41,20 @@ public class Canal implements Runnable{
 			maqEmissora.sendUrgentData(1);
 			entradaMaqEmi = new ObjectInputStream(maqEmissora.getInputStream());
 			saidaMaqEmi  = new ObjectOutputStream(maqEmissora.getOutputStream());
+			saidaMaqEmi.reset();
 			saidaMaqEmi.writeObject(true);
 			System.out.println("Maquina "+entradaMaqEmi.readObject()+" conectada com o canal ");
 			
 			//Realizando a conexao da maquina receptora
 			entradaMaqRec = new ObjectInputStream(maqReceptora.getInputStream());
 			saidaMaqRec  = new ObjectOutputStream(maqReceptora.getOutputStream());
+			saidaMaqRec.reset();
 			saidaMaqRec.writeObject(false);
 			System.out.println("Maquina "+entradaMaqRec.readObject()+" conectada com o canal");
 			
+			saidaMaqRec.reset();
 			saidaMaqRec.writeObject(Constantes.CANAL_PRONTO);
+			saidaMaqEmi.reset();
 			saidaMaqEmi.writeObject(Constantes.CANAL_PRONTO);
 			
 			while((Integer)entradaMaqEmi.readObject() != Constantes.FIM_TRANSMISSAO){
@@ -76,16 +80,18 @@ public class Canal implements Runnable{
 				saidaMaqRec.reset();
 				saidaMaqRec.writeObject(pacote);
 				
-//				if(!isPctTransferidoComSucesso()){
-//					Thread.sleep(Constantes.TEMPO_TIME_OUT);
-//					int[] tOut = {Constantes.TIME_OUT};
-// 					saidaMaqEmi.reset();
-//					saidaMaqEmi.writeObject(tOut);
-//					continue;
-//				}else{
+				int[] respRec = (int[]) entradaMaqRec.readObject();
+				
+				if(!isPctTransferidoComSucesso()){
+					Thread.sleep(Constantes.TEMPO_TIME_OUT);
+					int[] tOut = {Constantes.TIME_OUT};
+ 					saidaMaqEmi.reset();
+					saidaMaqEmi.writeObject(tOut);
+					continue;
+				}else{
 					saidaMaqEmi.reset();
-					saidaMaqEmi.writeObject(entradaMaqRec.readObject());
-//				}
+					saidaMaqEmi.writeObject(respRec);
+				}
 			}
 			saidaMaqRec.writeObject(Constantes.FIM_TRANSMISSAO);
 		} catch (IOException e) {

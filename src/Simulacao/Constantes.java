@@ -7,12 +7,12 @@ public class Constantes {
     public static final int NAO_USADO      = 2;
 	public static final int TIME_OUT       = 3;
 	
-	//Constantes usadas para definição do canal
+	//Constantes usadas para definiï¿½ï¿½o do canal
 	public static final int FIM_TRANSMISSAO = -1;
 	public static final int CANAL_PRONTO   = 10;
 	public static final int TRANSMISSAO    = 20;
-	public static final int PROB_PERDA     = 50;
-	public static final int TAXA_RUIDO     = 5;
+	public static final int PROB_PERDA     = 10;
+	public static final int TAXA_RUIDO     = 2;
 	public static final int TEMPO_TIME_OUT = 500;
 	
 	//Constantes que definem o tipo de protocolo a ser utilizado

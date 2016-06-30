@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.SocketTimeoutException;
-import java.nio.channels.ClosedByInterruptException;
-import java.nio.channels.InterruptedByTimeoutException;
 import java.util.Vector;
-import java.util.concurrent.TimeoutException;
 
 import Simulacao.Constantes;
 import Simulacao.Protocolo;
@@ -54,7 +51,7 @@ public class ProtGoBackN implements Protocolo{
 					}
 				}
 			}catch(SocketTimeoutException e){
-				System.out.println("Pacote não enviado por timeout... Realizando reenvio ");
+				System.out.println("Pacote nï¿½o enviado por timeout... Realizando reenvio ");
 				pacoteErro += pacote.size();
 			}
 		}

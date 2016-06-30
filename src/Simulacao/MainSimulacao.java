@@ -9,8 +9,6 @@ public class MainSimulacao {
 	private static Maquina comp1 = null;
 	private static Maquina comp2 = null;
 	
-	private static Collection<String> logs;
-	
 	private static final int PORTA_ENTRADA = 1234;
 	private static final int PORTA_SAIDA   = 1235;
 	private static final int QTD_PACOTES   = 23;
@@ -21,8 +19,8 @@ public class MainSimulacao {
 			
 			executor.execute(meio);
 			
-			comp1 = new Maquina("127.0.0.1", PORTA_ENTRADA, QTD_PACOTES, 2);
-			comp2 = new Maquina("127.0.0.2", PORTA_SAIDA, QTD_PACOTES, 2);
+			comp1 = new Maquina("127.0.0.1", PORTA_ENTRADA, QTD_PACOTES, i);
+			comp2 = new Maquina("127.0.0.2", PORTA_SAIDA, QTD_PACOTES, i);
 			
 			executor.execute(comp1);
 			executor.execute(comp2);
